@@ -16,7 +16,6 @@ export default function StartScreen() {
                     </button>
                     <button className="start-screen__button" onClick={() => navigate("/help")}>
                         help
-
                     </button>
                 </div>
             </div>
