@@ -1,0 +1,28 @@
+.start-screen {
+  @apply relative flex items-center justify-center h-screen w-screen bg-blue-100;
+}
+
+.start-screen__background {
+  @apply absolute inset-0 w-full h-full object-cover;
+}
+
+.start-screen__menu {
+  @apply absolute bottom-20 flex flex-col items-center;
+}
+
+.start-screen__buttons {
+  @apply absolute bottom-[8rem] flex flex-col gap-7 border-none;
+}
+
+.start-screen__button {
+  @apply px-6 py-2 text-lg font-bold text-black rounded-lg shadow-lg hover:bg-yellow-500 transition-all duration-300 ease-in-out; 
+} 
+
+.logoImage {
+  @apply items-center inset-0 w-[950] h-[950px] object-cover  ;
+}
+
+.menuImage {
+  @apply rounded-2xl relative -top-20 object-cover; 
+
+}
