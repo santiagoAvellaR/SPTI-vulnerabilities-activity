@@ -7,7 +7,7 @@
 Run the dev server:
 
 ```shellscript
-npm run dev
+pnpm install
 ```
 
 ## Deployment
@@ -15,26 +15,17 @@ npm run dev
 First, build your app for production:
 
 ```sh
-npm run build
-```
-
-Then run the app in production mode:
-
-```sh
-npm start
+pnpm run dev
 ```
 
 Now you'll need to pick a host to deploy it to.
 
-### DIY
-
-If you're familiar with deploying Node applications, the built-in Remix app server is production-ready.
-
-Make sure to deploy the output of `npm run build`
-
-- `build/server`
-- `build/client`
-
-## Styling
-
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever css framework you prefer. See the [Vite docs on css](https://vitejs.dev/guide/features.html#css) for more information.
+project scaffolding
+``` sh
+app/
+├── components/     # Reusable UI components
+├── routes/         # Route handlers and page components
+├── styles/         # Global styles and CSS modules
+├── utils/          # Utility functions
+public/             # Static assets (images, fonts, etc.)
+```
