@@ -1,0 +1,8 @@
+.modal-container {
+  @apply w-[1000px] h-[100px] rounded-lg shadow-xl overflow-hidden relative p-5 
+  max-height-[100vh] max-width-[90vw];
+}
+
+.basic-modal {
+  @apply outline-none;
+}
