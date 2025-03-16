@@ -5,12 +5,12 @@ import IceCreamSelector from "./components/IceCreamSelector";
 import GameControls from "./components/GameControls";
 
 const iceCreams = [
-    { id: 1, name: "Vanilla", image: "/vainilla.jpg" },
-    { id: 2, name: "Chocolate", image: "/chocolate.jpg" },
-    { id: 3, name: "amarillo", image: "/amarillo.jpg" },
-    { id: 4, name: "azulito", image: "/azulito.jpg" },
-    { id: 5, name: "fresa", image: "/fresa.jpg" },
-    { id: 6, name: "verde", image: "/verde.jpg" }
+    { id: 1, name: "Vanilla", image: "/vainilla.png" },
+    { id: 2, name: "Chocolate", image: "/chocolate.png" },
+    { id: 3, name: "amarillo", image: "/amarillo.png" },
+    { id: 4, name: "azulito", image: "/azulito.png" },
+    { id: 5, name: "fresa", image: "/fresa.png" },
+    { id: 6, name: "verde", image: "/verde.png" }
 ];
 
 export default function Lobby() {
@@ -44,7 +44,7 @@ export default function Lobby() {
                 });
             }, 1000);
         }
-        return () => clearInterval(timer);
+        return () => {clearInterval(timer); setCountdown(3)};
     }, [allPlayersReady, navigate, player1IceCream, player2IceCream, player1Name, player2Name]);
 
     const handleStartGame = () => {
