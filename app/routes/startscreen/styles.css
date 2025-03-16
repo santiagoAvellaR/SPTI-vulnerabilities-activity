@@ -15,7 +15,7 @@
 }
 
 .start-screen__button {
-  @apply px-6 py-2 text-lg font-bold text-black rounded-lg shadow-lg hover:bg-yellow-500 transition-all duration-300 ease-in-out; 
+  @apply px-6 py-2 border-none text-lg font-bold text-black rounded-lg shadow-lg hover:bg-yellow-500 transition-all duration-300 ease-in-out; 
 } 
 
 .logoImage {
