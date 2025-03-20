@@ -17,7 +17,6 @@ export default function Modal({
     children,
     blurAmount = "10px"
 }: ModalProps) {
-    // Prevent body scroll when modal is open
     if (typeof document !== "undefined") {
         if (isOpen) {
             document.body.style.overflow = "hidden";
@@ -37,7 +36,7 @@ export default function Modal({
             justifyContent: 'center'
         },
         content: {
-            position: 'relative',
+            position: 'relative' as 'relative',
             inset: 'auto',
             border: 'none',
             background: 'none',
