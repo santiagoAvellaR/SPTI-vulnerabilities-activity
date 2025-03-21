@@ -1,3 +1,4 @@
+import "./ScoreCounter.css";
 
 type ScoreCounterProps = {
   score: number;
@@ -5,7 +6,7 @@ type ScoreCounterProps = {
 };
 
 const ScoreCounter: React.FC<ScoreCounterProps> = ({ score, playerNumber }) => {
-    const digitRoute = `/game-screen/header/digits/player${playerNumber}-digit-`;
+  const digitRoute = `/game-screen/header/digits/player${playerNumber}-digit-`;
 
   // Extraemos las decenas y unidades del puntaje
   const tens = Math.floor(score / 10);
@@ -13,6 +14,7 @@ const ScoreCounter: React.FC<ScoreCounterProps> = ({ score, playerNumber }) => {
 
   return (
     <div className="score-counter">
+      <img src={`/game-screen/header/player${playerNumber}-icon.webp`} alt={`Icon player ${playerNumber}`} />
       <img src={`${digitRoute}${tens}.webp`} alt={`Decena ${tens}`} />
       <img src={`${digitRoute}${units}.webp`} alt={`Unidad ${units}`} />
     </div>
