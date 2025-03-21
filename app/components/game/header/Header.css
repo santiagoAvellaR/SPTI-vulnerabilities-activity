@@ -1,0 +1,68 @@
+.header {
+    display: flex;
+    justify-content: space-between; /* Espacio entre los 3 contenedores */
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #2c3e50; /* Color de fondo del header */
+    border-bottom: 4px solid #34495e; /* Separación visual */
+  }
+  
+  /* Contenedores principales */
+  .players-information-container,
+  .time-container,
+  .settings-buttons-container {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Espaciado entre los elementos */
+    width: auto;
+  }
+  
+  /* Ajuste de los iconos de los jugadores */
+  .players-information-container img:first-child,
+  .players-information-container img:nth-child(6) {
+    width: 50px; /* Tamaño del icono del jugador */
+    height: auto;
+  }
+  
+  /* Ajuste del score */
+  .Score {
+    display: flex;
+    align-items: center;
+    gap: 5px; /* Espaciado entre las imágenes del marcador */
+  }
+  
+  /* Ajuste del timer */
+  .time-container img {
+    width: 40px; /* Tamaño uniforme de los números y separadores */
+    height: auto;
+  }
+  
+  /* Ajuste de los botones */
+  .settings-buttons-container button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+  }
+  
+  .settings-buttons-container button:hover {
+    transform: scale(1.1); /* Efecto al pasar el mouse */
+  }
+  
+  .settings-buttons-container img {
+    width: 40px; /* Tamaño de los botones */
+    height: auto;
+  }
+
+  .players-information-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+/* Asegurar que los íconos y el score tengan el mismo tamaño */
+.players-information-container img {
+    width: 50px; /* Tamaño uniforme */
+    height: auto;
+}
+

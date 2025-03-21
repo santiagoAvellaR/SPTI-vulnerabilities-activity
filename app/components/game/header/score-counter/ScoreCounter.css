@@ -1,0 +1,13 @@
+.score-counter {
+    display: flex; 
+    flex-direction: row;
+    align-items: center;
+    gap: 5px;
+}
+
+
+.score-counter img {
+    width: 50px; /* Asegura tamaño uniforme */
+    height: auto;
+    display: inline-block; /* Evita comportamiento de bloque */
+}
