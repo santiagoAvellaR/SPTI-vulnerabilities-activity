@@ -1,11 +1,11 @@
-import "./Fruit.css";
+import "./FruitSelector.css";
 
 interface FruitProps {
     fruitName: string; // Nombre de la fruta
     actualFruit: string; // Fruta seleccionada actualmente
 }
 
-const Fruit: React.FC<FruitProps> = ({ fruitName, actualFruit }) => {
+const FruitSelector: React.FC<FruitProps> = ({ fruitName, actualFruit }) => {
   return (
     <div className={`fruit-wrapper ${fruitName === actualFruit ? "selected" : ""}`}>
       {fruitName === actualFruit && (
@@ -23,4 +23,4 @@ const Fruit: React.FC<FruitProps> = ({ fruitName, actualFruit }) => {
   );
 };
 
-export default Fruit;
+export default FruitSelector;
