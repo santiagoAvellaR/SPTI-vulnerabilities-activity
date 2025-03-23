@@ -7,7 +7,6 @@
 .fruit-bar {
     position: relative;
     width: 100%;
-    max-width: 1000px; /* Ajustar según sea necesario */
     margin: 0 auto;
   }
   

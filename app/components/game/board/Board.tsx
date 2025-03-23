@@ -3,7 +3,7 @@ import "./Board.css";
 
 const Board: React.FC = () => {
   return (
-    <div>
+    <div className="board">
       <h1>¡Bienvenido al juego!</h1>
       <div className="ice-cream-container">
         <IceCreamCharacter />

@@ -1,6 +1,8 @@
 import Header from "~/components/game/header/Header";
 import Board from "~/components/game/board/Board";
 import FruitBar from "~/components/game/footer/fruit-bar/FruitBar";
+import "./styles.css";
+
 import { useState } from "react";
 
 const GameScreen: React.FC = () => {
@@ -19,12 +21,15 @@ const GameScreen: React.FC = () => {
 
   return (
     <div className="game-screen">
-      <Header isRunning={isRunning} setIsRunning={setIsRunning} player1Score={scorePlayer1} setPlayer1Score={setScorePlayer1} 
+      <Header
+      isRunning={isRunning} setIsRunning={setIsRunning} player1Score={scorePlayer1} setPlayer1Score={setScorePlayer1} 
       player2Score={scorePlayer2} setPlayer2Score={setScorePlayer2} minutes={minutes} setMinutes={setMinutes} seconds={seconds}
       setSeconds={setSeconds} musicOn={musicOn} setMusicOn={setMusicOn} soundEffectsOn={soundEffectsOn} setSoundEffectsOn={setSoundEffectsOn}
       />
       <Board />
-      <FruitBar fruits={fruits} selectedFruit={actualFruit}/>
+      <FruitBar 
+      fruits={fruits} selectedFruit={actualFruit} 
+      />
     </div>
   );
 };
