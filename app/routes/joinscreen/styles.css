@@ -64,3 +64,18 @@
   @apply items-center py-3 px-6 border-2 h-[3.2rem] w-[7rem] border-yellow-500 bg-[#F3EAD0] text-lg font-bold text-black rounded-lg shadow-lg 
   hover:bg-yellow-500 transition-all duration-300 ease-in-out;
 }
+
+.join-modal-input.input-error {
+    @apply border-red-500 bg-red-50;
+}
+
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.join-modal-button-join:disabled {
+    animation: pulse 1.5s infinite;
+}
