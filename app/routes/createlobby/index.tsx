@@ -16,7 +16,6 @@ const iceCreams = [
     { id: 6, name: "verde", image: "/verde.png" }
 ];
 
-
 const connectionWebSocket = (userData) => {
     const matchDetails = { level: 3, map: "desert" };
     // Codificamos el objeto JSON para la URL
@@ -40,7 +39,7 @@ export default function Lobby() {
     const [player2Ready, setPlayer2Ready] = useState(false);
     const [isSoloPlayer, setIsSoloPlayer] = useState(true);
     const [player1Name, setPlayer1Name] = useState("Player 1");
-    const [player2Name, setPlayer2Name] = useState("Waiting for player...");
+    const [player2Name, setPlayer2Name] = useState("Player 2");
     const [countdown, setCountdown] = useState(3);
 
     // Inicializa roomCode con "Loading..."
@@ -49,13 +48,43 @@ export default function Lobby() {
     const [searchTime, setSearchTime] = useState(0);
     const [error, setError] = useState("");
 
+    // Estado para controlar la visibilidad del segundo jugador
+    const [showSecondPlayer, setShowSecondPlayer] = useState(false);
+
+    // Estado para controlar la animación previa a la aparición
+    const [playerJoining, setPlayerJoining] = useState(false);
+
+    // Variable para prevenir navegaciones duplicadas
+    const [gameStarted, setGameStarted] = useState(false);
+
+    // Efecto para mostrar al segundo jugador después de 10 segundos
+    useEffect(() => {
+        // Primero mostramos la animación de "uniendo" a los 8 segundos
+        const joiningTimer = setTimeout(() => {
+            console.log("Player joining animation started");
+            setPlayerJoining(true);
+        }, 3000);
+
+        // Luego mostramos el jugador completo a los 10 segundos
+        const showPlayerTimer = setTimeout(() => {
+            console.log("Showing second player");
+            setShowSecondPlayer(true);
+        }, 5000);
+
+        return () => {
+            clearTimeout(joiningTimer);
+            clearTimeout(showPlayerTimer);
+        };
+    }, []);
+
     // Cargar el código de sala cuando el componente se monte
     useEffect(() => {
         const loadRoomCode = async () => {
             try {
+                console.log("userData:", userData);
+                console.log("userData?.userId:", userData?.userId);
                 const response = await api.get(`/rest/users/${userData?.userId}/matches`);
                 console.log("API response:", response.data);
-                console.log("user:", userData?.userId);
                 setRoomCode(response.data);
             } catch (error) {
                 console.error("Error loading room code:", error);
@@ -90,7 +119,7 @@ export default function Lobby() {
                 : iceCreams;
 
             setPlayer2IceCream(availableCharacters[0] || iceCreams[0]);
-            setPlayer2Ready(true); // Auto-ready player 2 in solo mode
+            setPlayer2Ready(false); // Auto-ready player 2 in solo mode
         }
     }, [isSoloPlayer, player1IceCream, player2IceCream]);
 
@@ -101,13 +130,17 @@ export default function Lobby() {
 
     // Countdown timer when players are ready
     useEffect(() => {
+        // Solo iniciar el temporizador si el juego no ha comenzado ya
+        if (gameStarted) return;
+
         let timer;
         if (isGameReady) {
             timer = setInterval(() => {
                 setCountdown(prev => {
                     if (prev <= 1) {
                         clearInterval(timer);
-                        // Navigate to game when countdown reaches 0
+                        // Marcar como iniciado y navegar
+                        setGameStarted(true);
                         navigate(createGameUrl());
                         return 0;
                     }
@@ -116,7 +149,7 @@ export default function Lobby() {
             }, 1000);
         }
         return () => { clearInterval(timer); setCountdown(3) };
-    }, [isGameReady, navigate, player1IceCream, player2IceCream, player1Name, player2Name]);
+    }, [isGameReady, navigate, gameStarted]);
 
     // Function to create the game URL with appropriate parameters
     const createGameUrl = () => {
@@ -129,9 +162,13 @@ export default function Lobby() {
     };
 
     const handleStartGame = () => {
+        // Evitar iniciar el juego más de una vez
+        if (gameStarted) return;
+
         if (isSoloPlayer) {
             // For solo mode, only check if player 1 is ready
             if (player1Ready && player1IceCream) {
+                setGameStarted(true);
                 navigate(createGameUrl());
             } else {
                 alert("Please select your character and click Ready to start");
@@ -139,6 +176,7 @@ export default function Lobby() {
         } else {
             // For two-player mode, check both players
             if ((player1Ready && player2Ready) && (player1IceCream && player2IceCream)) {
+                setGameStarted(true);
                 navigate(createGameUrl());
             } else {
                 alert("Both players must select a character and be ready to start");
@@ -151,16 +189,14 @@ export default function Lobby() {
     };
 
     const handleFindOpponent = () => {
-        if (userData) {
-            const ws = connectionWebSocket(userData);
-            if (ws) {
-                setIsSearching(true);
-            } else {
-                setError("Failed to create WebSocket connection");
-            }
+
+        const ws = connectionWebSocket(userData);
+        if (ws) {
+            setIsSearching(true);
         } else {
-            setError("User data not available");
+            setError("Failed to create WebSocket connection");
         }
+
     };
 
     const cancelMatchmaking = () => {
@@ -175,6 +211,7 @@ export default function Lobby() {
         return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     };
 
+
     return (
         <div className="lobby-screen">
             <h1 className="lobby-title">
@@ -187,18 +224,35 @@ export default function Lobby() {
                 </div>
             )}
 
-            <div className="selectors-container">
-                <IceCreamSelector
-                    iceCreams={iceCreams}
-                    selectedIceCream={player1IceCream}
-                    onIceCreamSelect={setPlayer1IceCream}
-                    position="left"
-                    playerName="Player 1"
-                    isReady={player1Ready}
-                    onReadyToggle={togglePlayer1Ready}
-                    playerCustomName={player1Name}
-                    onPlayerNameChange={setPlayer1Name}
-                />
+            {/* Mensaje de estado cuando el jugador se está uniendo */}
+            {playerJoining && !showSecondPlayer && (
+                <div className="player-connecting-status">
+                    <p>Player connecting...</p>
+                </div>
+            )}
+
+            {!playerJoining && !showSecondPlayer && (
+                <div className="waiting-for-player">
+                    <p>Waiting for another player to join...</p>
+                </div>
+            )}
+
+            {/* Contenedor principal con clases dinámicas */}
+            <div className={`selectors-container ${!showSecondPlayer ? 'single-player-mode' : ''} ${playerJoining ? 'player-joining' : ''}`}>
+                {/* Player 1 selector - siempre visible */}
+                <div className="player1-container">
+                    <IceCreamSelector
+                        iceCreams={iceCreams}
+                        selectedIceCream={player1IceCream}
+                        onIceCreamSelect={setPlayer1IceCream}
+                        position="left"
+                        playerName="Player 1"
+                        isReady={player1Ready}
+                        onReadyToggle={togglePlayer1Ready}
+                        playerCustomName={player1Name}
+                        onPlayerNameChange={setPlayer1Name}
+                    />
+                </div>
 
                 {/* Middle section */}
                 <div className="middle-section">
@@ -228,7 +282,6 @@ export default function Lobby() {
                                 <button
                                     className="find-opponent-button"
                                     onClick={handleFindOpponent}
-                                    disabled={!player1Ready || !player1IceCream}
                                 >
                                     Find Opponent
                                 </button>
@@ -248,6 +301,7 @@ export default function Lobby() {
                             <button
                                 className="start-now-button"
                                 onClick={handleStartGame}
+                                disabled={gameStarted}
                             >
                                 Start Now
                             </button>
@@ -258,23 +312,26 @@ export default function Lobby() {
                         <GameControls
                             onStartGame={handleStartGame}
                             onBack={handleBackButton}
-                            disabled={!player1IceCream || !player1Ready}
+                            disabled={!player1IceCream || !player1Ready || gameStarted}
                         />
                     )}
                 </div>
 
-                <IceCreamSelector
-                    iceCreams={iceCreams}
-                    selectedIceCream={player2IceCream}
-                    onIceCreamSelect={setPlayer2IceCream}
-                    position="right"
-                    playerName="Player 2"
-                    isReady={player2Ready}
-                    onReadyToggle={togglePlayer2Ready}
-                    playerCustomName={player2Name}
-                    onPlayerNameChange={setPlayer2Name}
-                    isDisabled={true} // Always disabled until a second player joins
-                />
+                {/* Contenedor para el segundo jugador */}
+                <div className="player2-container">
+                    <IceCreamSelector
+                        iceCreams={iceCreams}
+                        selectedIceCream={player2IceCream}
+                        onIceCreamSelect={setPlayer2IceCream}
+                        position="right"
+                        playerName="Player 2"
+                        isReady={player2Ready}
+                        onReadyToggle={togglePlayer2Ready}
+                        playerCustomName={player2Name}
+                        onPlayerNameChange={setPlayer2Name}
+                        isDisabled={!showSecondPlayer}
+                    />
+                </div>
             </div>
         </div>
     );
