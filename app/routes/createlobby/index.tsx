@@ -16,48 +16,24 @@ const iceCreams = [
     { id: 6, name: "verde", image: "/verde.png" }
 ];
 
-const codeRoom = async () => {
-    const [error, setError] = useState("");
 
-    setError("");
-
-    try {
-        const response = await api.get("/rest/room");
-        return response.data.roomCode;
-    } catch (error) {
-        console.error("Error in handleStartGame:", error);
-
-        const Error = (error as any);
-
-        if (Error.response) {
-            // The server responded with a status code outside the 2xx range
-            setError(`Server error: ${Error.response.data?.message || Error.response.statusText}`);
-        } else if (Error.request) {
-            // The request was made but no response was received
-            setError("Network error: Unable to reach the server");
-        } else {
-            // Something else happened in setting up the request
-            setError(`Error: ${Error.message}`);
-        }
-    }
-};
-
-const connectionWebSocket = () => {
-    const { userData } = useUser();
+const connectionWebSocket = (userData) => {
     const matchDetails = { level: 3, map: "desert" };
     // Codificamos el objeto JSON para la URL
     const messageParam = encodeURIComponent(JSON.stringify(matchDetails));
     const wsURI = `/ws/matchmaking?userId=${userData?.userId}&message=${messageParam}`;
     try {
         const ws = createWebSocketConnection(wsURI);
+        return ws;
     } catch (error) {
         console.error("Error creating WebSocket connection", error);
+        return null;
     }
 }
 
-
 export default function Lobby() {
     const navigate = useNavigate();
+    const { userData } = useUser();
     const [player1IceCream, setPlayer1IceCream] = useState(null);
     const [player2IceCream, setPlayer2IceCream] = useState(null);
     const [player1Ready, setPlayer1Ready] = useState(false);
@@ -66,16 +42,36 @@ export default function Lobby() {
     const [player1Name, setPlayer1Name] = useState("Player 1");
     const [player2Name, setPlayer2Name] = useState("Waiting for player...");
     const [countdown, setCountdown] = useState(3);
-    const [roomCode] = useState(() => codeRoom());
+
+    // Inicializa roomCode con "Loading..."
+    const [roomCode, setRoomCode] = useState("Loading...");
     const [isSearching, setIsSearching] = useState(false);
     const [searchTime, setSearchTime] = useState(0);
+    const [error, setError] = useState("");
+
+    // Cargar el código de sala cuando el componente se monte
+    useEffect(() => {
+        const loadRoomCode = async () => {
+            try {
+                const response = await api.get(`/rest/users/${userData?.userId}/matches`);
+                console.log("API response:", response.data);
+                console.log("user:", userData?.userId);
+                setRoomCode(response.data);
+            } catch (error) {
+                console.error("Error loading room code:", error);
+                setRoomCode("ERROR");
+            }
+        };
+
+        loadRoomCode();
+    }, [userData?.userId]);
 
     const togglePlayer1Ready = () => setPlayer1Ready(prev => !prev);
     const togglePlayer2Ready = () => setPlayer2Ready(prev => !prev);
 
     // Simulate matchmaking search timer
     useEffect(() => {
-        let searchTimer: string | number | NodeJS.Timeout | undefined;
+        let searchTimer;
         if (isSearching) {
             searchTimer = setInterval(() => {
                 setSearchTime(prev => prev + 1);
@@ -105,7 +101,7 @@ export default function Lobby() {
 
     // Countdown timer when players are ready
     useEffect(() => {
-        let timer: string | number | NodeJS.Timeout | undefined;
+        let timer;
         if (isGameReady) {
             timer = setInterval(() => {
                 setCountdown(prev => {
@@ -155,9 +151,16 @@ export default function Lobby() {
     };
 
     const handleFindOpponent = () => {
-        connectionWebSocket();
-        setIsSearching(true);
-
+        if (userData) {
+            const ws = connectionWebSocket(userData);
+            if (ws) {
+                setIsSearching(true);
+            } else {
+                setError("Failed to create WebSocket connection");
+            }
+        } else {
+            setError("User data not available");
+        }
     };
 
     const cancelMatchmaking = () => {
@@ -177,6 +180,12 @@ export default function Lobby() {
             <h1 className="lobby-title">
                 Room Code: <span className="room-code">{roomCode}</span>
             </h1>
+
+            {error && (
+                <div className="error-message">
+                    {error}
+                </div>
+            )}
 
             <div className="selectors-container">
                 <IceCreamSelector
@@ -219,6 +228,7 @@ export default function Lobby() {
                                 <button
                                     className="find-opponent-button"
                                     onClick={handleFindOpponent}
+                                    disabled={!player1Ready || !player1IceCream}
                                 >
                                     Find Opponent
                                 </button>

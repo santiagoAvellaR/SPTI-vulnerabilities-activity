@@ -72,8 +72,10 @@ export default function JoinScreen() {
         };
 
         try {
-            const response = await api.post(`/users/${userData?.userId}/matches`, lobbyData);
+            console.log("askdjhsakd", userData?.userId);
+            const response = await api.post(`/rest/users/${userData?.userId}/matches`, lobbyData);
             console.log("API response:", response.data);
+            navigate(`/createlobby?code=${response.data.code}`);
         } catch (error) {
             console.error("Error in handleCreateLobby:", error);
             const Error = (error as any);

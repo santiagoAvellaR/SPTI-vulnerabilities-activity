@@ -7,39 +7,51 @@ import "./styles.css";
 export default function StartScreen() {
     const navigate = useNavigate();
     const [error, setError] = useState("");
-    const { setUserData } = useUser();
+    const { setUserData, userData } = useUser();
 
     const handleStartGame = async () => {
         console.log("handleStartGame");
         setError("");
         try {
-
-            const response = await api.post("/rest/users", {
-            }, {
+            console.log("handleStartGame - Before API call");
+            const response = await api.post("/rest/users", {}, {
                 withCredentials: false,
             });
 
-            console.log("API response:", response.data);
-            setUserData(response.data);
-            navigate("/joinscreen");
+            if (response.data && response.data.userId) {
+                const userId = response.data.userId;
+
+                if (typeof setUserData !== 'function') {
+                    setError("Internal error: setUserData not available");
+                    return;
+                }
+
+                console.log("handleStartGame - Setting userId:", userId);
+                setUserData(userId);
+
+                // Navigate to the lobby
+                navigate("/joinscreen");
+                console.log("hola:", userData?.userId);
+
+            } else {
+                console.error("Invalid response data:", response.data);
+                setError("Invalid response from server: Missing userId");
+            }
         }
         catch (error) {
             console.error("Error in handleStartGame:", error);
-
             const Error = (error as any);
 
             if (Error.response) {
-                // The server responded with a status code outside the 2xx range
                 setError(`Server error: ${Error.response.data?.message || Error.response.statusText}`);
             } else if (Error.request) {
-                // The request was made but no response was received
                 setError("Network error: Unable to reach the server");
             } else {
-                // Something else happened in setting up the request
                 setError(`Error: ${Error.message}`);
             }
         }
-    }
+    };
+
 
     return (
         <div className="start-screen">
