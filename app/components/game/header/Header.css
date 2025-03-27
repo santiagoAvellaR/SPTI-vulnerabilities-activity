@@ -1,0 +1,46 @@
+:root {
+  --image-width: 40px; /* ancho de las imágenes */
+}
+.header {
+    display: flex;
+    justify-content: space-between; /* Espacio entre los 3 contenedores */
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #fffcad; /* Color de fondo del header */
+    border-bottom: 4px solid #a49131; /* Separación visual */
+  }
+  
+  /* Contenedores principales */
+  .time-container,
+  .score-counter,
+  .settings-buttons-container {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Espaciado entre los elementos */
+    width: auto;
+  }
+  
+  /* Ajuste del timer */
+  .time-container img,
+  .score-counter img {
+    width: var(--image-width);
+    height: auto;
+  }
+  
+  /* Ajuste de los botones */
+  .settings-buttons-container button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+  }
+  
+  .settings-buttons-container button:hover {
+    transform: scale(1.3); /* Efecto al pasar el mouse */
+  }
+  
+  .settings-buttons-container img {
+    width: var(--image-width);
+    height: auto;
+  }
+

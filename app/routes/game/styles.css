@@ -1,0 +1,47 @@
+.game-screen {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+  }
+  
+  /* Header arriba */
+  .header {
+    flex: 0 0 10%;
+  }
+  
+  /* GameBoard centrado */
+  .board {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #daeeff; /* Ajusta el color del fondo */
+  }
+  
+  /* FruitBar abajo */
+  .fruit-bar {
+    flex: 0 0 5%;
+    background-color: #fffcad; /* Ajusta según tu diseño */
+  }
+  
+  /* Responsividad */
+  @media (max-width: 768px) {
+    .header {
+      flex: 0 0 12%;
+    }
+    .fruit-bar {
+      flex: 0 0 18%;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .header {
+      flex: 0 0 14%;
+    }
+    .fruit-bar {
+      flex: 0 0 20%;
+    }
+  }
+  
