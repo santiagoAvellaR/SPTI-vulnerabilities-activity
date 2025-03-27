@@ -32,7 +32,7 @@ export default function App() {
         <Meta />
         <Links />
       </head>
-      <body>
+      <body style={{}}>
         <UserProvider>
           <Outlet />
         </UserProvider>

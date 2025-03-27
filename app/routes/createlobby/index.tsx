@@ -84,8 +84,8 @@ export default function Lobby() {
                 console.log("userData:", userData);
                 console.log("userData?.userId:", userData?.userId);
                 const response = await api.get(`/rest/users/${userData?.userId}/matches`);
-                console.log("API response:", response.data);
-                setRoomCode(response.data);
+                console.log("API response:", response.data.matchId);
+                setRoomCode(response.data.matchId);
             } catch (error) {
                 console.error("Error loading room code:", error);
                 setRoomCode("ERROR");
