@@ -190,6 +190,7 @@ export default function Lobby() {
 
     const handleFindOpponent = () => {
 
+        navigate("/game")
         const ws = connectionWebSocket(userData);
         if (ws) {
             setIsSearching(true);
