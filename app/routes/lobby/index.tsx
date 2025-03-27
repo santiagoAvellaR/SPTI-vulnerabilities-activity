@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "@remix-run/react";
-import "./styles.css";
 import IceCreamSelector from "./components/IceCreamSelector";
 import GameControls from "./components/GameControls";
+import "./styles.css";
 
 const iceCreams = [
     { id: 1, name: "Vanilla", image: "/vainilla.png" },
