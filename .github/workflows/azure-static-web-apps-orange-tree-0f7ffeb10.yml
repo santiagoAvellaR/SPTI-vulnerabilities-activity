@@ -45,9 +45,9 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const core = await import('@actions/core');
-            return await core.getIDToken();
+            return await (await import('@actions/core')).getIDToken();
           result-encoding: string
+
 
       - name: Build And Deploy
         id: builddeploy
