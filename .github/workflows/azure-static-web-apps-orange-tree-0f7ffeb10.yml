@@ -40,22 +40,13 @@ jobs:
       - name: Build the project
         run: pnpm build
 
-      - name: Get Id Token
-        id: idtoken
-        uses: actions/github-script@v6
-        with:
-          script: |
-            return await (await import('@actions/core')).getIDToken();
-          result-encoding: string
-
-
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_ORANGE_TREE_0F7FFEB10 }}
           action: "upload"
-          app_location: "./"            # Ubicación del código fuente de la aplicación
-          api_location: "build/server"    # Ubicación del código generado para el servidor/SSR
-          output_location: "build/client" # Ubicación de los assets estáticos (debe incluir index.html)
-          github_id_token: ${{ steps.idtoken.outputs.result }}
+          app_location: "./"            
+          api_location: "build/server"    
+          output_location: "build/client" 
+
