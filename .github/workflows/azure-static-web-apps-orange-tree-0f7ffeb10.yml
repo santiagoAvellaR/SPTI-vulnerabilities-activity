@@ -41,12 +41,12 @@ jobs:
         run: pnpm build
 
       - name: Get Id Token
-        uses: actions/github-script@v6
         id: idtoken
+        uses: actions/github-script@v6
         with:
           script: |
-            const actionsCore = require('@actions/core');
-            return await actionsCore.getIDToken();
+            const core = await import('@actions/core');
+            return await core.getIDToken();
           result-encoding: string
 
       - name: Build And Deploy
