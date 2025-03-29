@@ -57,7 +57,7 @@ jobs:
         run: unzip release.zip
       
       - name: Wait for previous deployment to finish
-        run: sleep 60
+        run: sleep 180
       
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
@@ -68,3 +68,5 @@ jobs:
           package: .
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_E5E771DEC02649C582819A32A512D40F }}
           clean: true
+          skip_app_service_deployment_wait: true
+
