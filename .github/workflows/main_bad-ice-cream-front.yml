@@ -1,3 +1,6 @@
+# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+
 name: Build and deploy Node.js app to Azure Web App - bad-ice-cream-front
 
 on:
@@ -10,26 +13,21 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: read #This is required for actions/checkout
 
     steps:
       - uses: actions/checkout@v4
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10
 
       - name: Set up Node.js version
         uses: actions/setup-node@v3
         with:
           node-version: '22.x'
-          cache: 'pnpm'
 
-      - name: Install dependencies, build and test
+      - name: npm install, build, and test
         run: |
-          pnpm install
-          pnpm run build
+          npm install
+          npm run build --if-present
+          npm run test --if-present
 
       - name: Zip artifact for deployment
         run: zip release.zip ./* -r
@@ -56,17 +54,11 @@ jobs:
       - name: Unzip artifact for deployment
         run: unzip release.zip
       
-      - name: Wait for previous deployment to finish
-        run: sleep 180
-      
-      - name: Deploy to Azure Web App
+      - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'bad-ice-cream-front'
           slot-name: 'Production'
           package: .
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_E5E771DEC02649C582819A32A512D40F }}
-          clean: true
-          skip_app_service_deployment_wait: true
-
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_EF40FFC39D634778ADEFC9AD26CC2277 }}
