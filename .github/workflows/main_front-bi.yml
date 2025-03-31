@@ -62,4 +62,4 @@ jobs:
           app-name: 'front-BI'
           slot-name: 'Production'
           package: .
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_2A3239B552C545B994AC5351D209B174 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_FRONTARSW }}
