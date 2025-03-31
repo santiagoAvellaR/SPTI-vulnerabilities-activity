@@ -1,17 +1,18 @@
-const express = require('express');
-const { createRequestHandler } = require('@remix-run/express');
-const path = require('path');
+import express from 'express';
+import { createRequestHandler } from '@remix-run/express';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// http://expressjs.com/en/advanced/best-practice-security.html#at-a-minimum-disable-x-powered-by-header
 app.disable('x-powered-by');
 
-// Serve static files from the public directory
 app.use(express.static('public'));
 
-// Everything else is handled by Remix
 app.all(
   '*',
   createRequestHandler({
