@@ -163,7 +163,7 @@ app.all("*", (req, res) => {
       build: buildModule,
       getLoadContext: () => ({})
     })(req, res);
-  } catch (error) {
+  } catch (error) { 
     console.error("Error handling request:", error);
     res.status(500).send(`
       <html>
