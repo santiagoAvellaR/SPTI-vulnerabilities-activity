@@ -36,11 +36,20 @@ jobs:
         env:
           NODE_ENV: production
 
+      # Create a deployment package with only necessary files
+      - name: Create deployment package
+        run: |
+          mkdir deployment
+          cp -r build/* deployment/ || true
+          cp -r public deployment/ || true
+          cp package.json pnpm-lock.yaml server.js deployment/
+          cp .env.example deployment/.env
+
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
         with:
           app-name: 'arswFront'
           slot-name: 'Production'
-          package: .
+          package: './deployment'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_FRONTARSW }}
