@@ -10,7 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: read #This is required for actions/checkout
+      contents: read
 
     steps:
       - uses: actions/checkout@v4
@@ -23,7 +23,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20.x'  # Usando Node.js 20 LTS para mayor compatibilidad con Azure
+          node-version: '20.x'
           cache: 'pnpm'
 
       - name: Install dependencies
@@ -34,54 +34,80 @@ jobs:
         env:
           NODE_ENV: production
 
-      # Crear server.js en la raíz para compatibilidad con Azure
+      # Crear un package.json simplificado para producción
+      - name: Create production package.json
+        run: |
+          node -e "const pkg = require('./package.json'); 
+          const newPkg = { 
+            name: pkg.name, 
+            version: pkg.version, 
+            engines: { node: '20.x' }, 
+            dependencies: pkg.dependencies || {}, 
+            scripts: { 
+              start: 'node server.js' 
+            } 
+          }; 
+          // Asegurarnos de que estas dependencias están incluidas
+          newPkg.dependencies['express'] = '^4.18.2';
+          newPkg.dependencies['compression'] = '^1.7.4';
+          newPkg.dependencies['@remix-run/express'] = pkg.dependencies['@remix-run/express'] || '^2.0.0';
+          console.log(JSON.stringify(newPkg, null, 2));" > package.json.new
+          mv package.json.new deploy-package.json
+
+      # Crear server.js simplificado y probado
       - name: Create server.js for Azure
         run: |
-          echo 'const { createRequestHandler } = require("@remix-run/express");
-          const express = require("express");
-          const compression = require("compression");
-          const path = require("path");
-          
+          cat > server.js << 'EOL'
+          const express = require('express');
+          const compression = require('compression');
+          const path = require('path');
+          const { createRequestHandler } = require('@remix-run/express');
+
           const app = express();
-          
           app.use(compression());
-          
+
           // Servir archivos estáticos
-          app.use("/build", express.static(path.join(process.cwd(), "public/build"), {
+          app.use("/build", express.static(path.join(__dirname, "public/build"), {
             immutable: true,
             maxAge: "1y"
           }));
-          
+
           app.use(express.static("public", { maxAge: "1h" }));
-          
+
           // Todas las demás solicitudes son manejadas por Remix
           app.all(
             "*",
-            createRequestHandler({
-              build: require("./build"),
-              getLoadContext: (req, res) => ({})
-            })
+            (req, res, next) => {
+              try {
+                return createRequestHandler({
+                  build: require("./build"),
+                  getLoadContext: () => ({})
+                })(req, res, next);
+              } catch (error) {
+                console.error("Error handling request:", error);
+                res.status(500).send("Server Error: " + error.message);
+              }
+            }
           );
-          
-          const port = process.env.PORT || 3000;
-          
+
+          const port = process.env.PORT || 8080;
           app.listen(port, () => {
             console.log(`Express server listening on port ${port}`);
-          });' > server.js
+          });
+          EOL
 
-      - name: Create web.config for Azure
+      - name: Create web.config for IIS
         run: |
-          echo '<?xml version="1.0" encoding="utf-8"?>
+          cat > web.config << 'EOL'
+          <?xml version="1.0" encoding="utf-8"?>
           <configuration>
             <system.webServer>
+              <webSocket enabled="false" />
               <handlers>
                 <add name="iisnode" path="server.js" verb="*" modules="iisnode"/>
               </handlers>
               <rewrite>
                 <rules>
-                  <rule name="NodeInspector" stopProcessing="true">
-                    <match url="^server.js\/debug[\/]?" />
-                  </rule>
                   <rule name="StaticContent">
                     <action type="Rewrite" url="public{REQUEST_URI}"/>
                   </rule>
@@ -93,33 +119,28 @@ jobs:
                   </rule>
                 </rules>
               </rewrite>
-              <httpErrors existingResponse="PassThrough" />
+              <iisnode watchedFiles="web.config;*.js"/>
             </system.webServer>
-          </configuration>' > web.config
+          </configuration>
+          EOL
 
-      - name: Create Azure startup command file
-        run: |
-          echo "node server.js" > .startup.cmd
-
-      # Agregar dependencias expresas al package.json para producción
-      - name: Add Express dependencies
+      # Instalar las dependencias requeridas explícitamente
+      - name: Install required dependencies
         run: |
           pnpm add express compression @remix-run/express
 
+      # Crear el paquete de despliegue
       - name: Create deployment package
         run: |
           mkdir -p deploy
           cp -r build deploy/
           cp -r public deploy/
-          cp package.json deploy/
-          cp pnpm-lock.yaml deploy/
           cp server.js deploy/
           cp web.config deploy/
-          cp .startup.cmd deploy/
-
-      - name: Add pnpm setup script
-        run: |
-          echo '{ "scripts": { "setup": "npx pnpm install --prod", "start": "node server.js" } }' > deploy/package.json
+          cp deploy-package.json deploy/package.json
+          cp pnpm-lock.yaml deploy/
+          echo "Installing production dependencies only..."
+          cd deploy && npm install --omit=dev
 
       - name: Zip artifact for deployment
         run: cd deploy && zip -r ../release.zip .
