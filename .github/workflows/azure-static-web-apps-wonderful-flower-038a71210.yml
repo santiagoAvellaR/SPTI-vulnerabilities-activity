@@ -23,7 +23,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18.x'  # Usar Node.js 18 LTS para mayor estabilidad
+          node-version: '22.x'  # Usar Node.js 18 LTS para mayor estabilidad
           cache: 'pnpm'
 
       - name: Install dependencies
