@@ -1,4 +1,4 @@
-name: Build and deploy Node.js app to Azure Web App - front-BI
+name: Build and deploy Node.js app to Azure Web App - frontArsw
 
 on:
   push:
@@ -59,7 +59,7 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'front-BI'
+          app-name: 'frontArsw'
           slot-name: 'Production'
-          package: .
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_FRONTARSW }}
+          package: . 
