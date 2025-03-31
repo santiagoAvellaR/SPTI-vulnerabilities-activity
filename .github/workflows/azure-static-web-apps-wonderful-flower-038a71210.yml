@@ -23,7 +23,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20.x'
+          node-version: '22.13.1'  # Cambiado a Node.js 18 LTS por mayor estabilidad
           cache: 'pnpm'
 
       - name: Install dependencies
@@ -36,126 +36,42 @@ jobs:
 
       - name: Create deployment package
         run: |
-          # Crear server.js con manejo de errores mejorado y verificación de rutas
-          echo 'const express = require("express");
-          const compression = require("compression");
-          const path = require("path");
-          const fs = require("fs");
-          const { createRequestHandler } = require("@remix-run/express");
+          # Crear server.js optimizado para producción
+          cat > server.js << 'EOL'
+          const express = require('express');
+          const compression = require('compression');
+          const path = require('path');
+          const fs = require('fs');
 
           const app = express();
           app.use(compression());
 
-          // Verificar rutas de archivos antes de iniciar
-          const checkPaths = () => {
-            console.log("Current directory:", __dirname);
-            console.log("Directory contents:", fs.readdirSync(__dirname));
-            
-            // Verificar ubicación del build
-            const buildPaths = [
-              "./build",
-              "./build/index.js",
-              "../build",
-              "/home/site/wwwroot/build"
-            ];
-            
-            for (const buildPath of buildPaths) {
-              try {
-                if (fs.existsSync(buildPath)) {
-                  console.log(`Found build at: ${buildPath}`);
-                  return buildPath;
-                }
-              } catch (err) {
-                console.log(`Error checking ${buildPath}:`, err);
-              }
-            }
-            
-            // Si no se encuentra, buscar recursivamente
-            console.log("Searching for build directory recursively...");
-            return findBuildRecursively(__dirname) || "./build";
-          };
-          
-          // Función para buscar el build recursivamente
-          const findBuildRecursively = (dir, depth = 0) => {
-            if (depth > 3) return null; // Limitar profundidad
-            
-            const files = fs.readdirSync(dir);
-            
-            if (files.includes("build") && fs.statSync(path.join(dir, "build")).isDirectory()) {
-              return path.join(dir, "build");
-            }
-            
-            for (const file of files) {
-              const filePath = path.join(dir, file);
-              if (fs.statSync(filePath).isDirectory() && file !== "node_modules") {
-                const result = findBuildRecursively(filePath, depth + 1);
-                if (result) return result;
-              }
-            }
-            
-            return null;
-          };
-          
-          const buildPath = checkPaths();
-          console.log(`Using build path: ${buildPath}`);
+          // Ruta de health check para Azure
+          app.get('/health', (req, res) => {
+            res.status(200).send('OK');
+          });
 
           // Servir archivos estáticos
-          app.use("/build", express.static(path.join(__dirname, "public/build"), {
-            immutable: true,
-            maxAge: "1y"
-          }));
+          app.use(express.static('public', { maxAge: '1h' }));
 
-          app.use(express.static("public", { maxAge: "1h" }));
-
-          // Verificar si existe el archivo de build
-          let buildModule;
-          try {
-            buildModule = require(buildPath);
-            console.log("Build module loaded successfully");
-          } catch (error) {
-            console.error(`Failed to load build module from ${buildPath}:`, error);
-            app.use((req, res) => {
-              res.status(500).send(`
-                <html>
-                  <head><title>Server Error</title></head>
-                  <body>
-                    <h1>Server Configuration Error</h1>
-                    <p>The server is misconfigured. Could not find build at ${buildPath}.</p>
-                    <pre>${error.stack}</pre>
-                  </body>
-                </html>
-              `);
-            });
-            buildModule = null;
-          }
-
-          // Todas las demás solicitudes son manejadas por Remix
-          if (buildModule) {
-            app.all(
-              "*",
-              (req, res, next) => {
-                try {
-                  return createRequestHandler({
-                    build: buildModule,
-                    getLoadContext: () => ({})
-                  })(req, res, next);
-                } catch (error) {
-                  console.error("Error handling request:", error);
-                  res.status(500).send("Server Error: " + error.message);
-                }
-              }
-            );
-          }
+          // Ruta para servir directamente el archivo HTML generado por Remix
+          app.use('*', (req, res) => {
+            // Servir el index.html generado
+            res.sendFile(path.join(__dirname, 'public', 'index.html'));
+          });
 
           const port = process.env.PORT || 8080;
           app.listen(port, () => {
             console.log(`Express server listening on port ${port}`);
-          });' > server.js
+          });
+          EOL
 
           # Crear web.config optimizado para IIS
-          echo '<?xml version="1.0" encoding="utf-8"?>
+          cat > web.config << 'EOL'
+          <?xml version="1.0" encoding="utf-8"?>
           <configuration>
             <system.webServer>
+              <webSocket enabled="false" />
               <handlers>
                 <add name="iisnode" path="server.js" verb="*" modules="iisnode"/>
               </handlers>
@@ -172,53 +88,53 @@ jobs:
                   </rule>
                 </rules>
               </rewrite>
-              <iisnode 
+              <iisnode
                 nodeProcessCommandLine="node"
-                watchedFiles="server.js;web.config"
+                watchedFiles="web.config;*.js"
                 loggingEnabled="true"
-                logDirectory="iisnode"
-                debuggingEnabled="true"
               />
             </system.webServer>
-          </configuration>' > web.config
+          </configuration>
+          EOL
 
-          # Crear package.json simplificado con todas las dependencias necesarias
-          echo '{
+          # Crear .deployment para especificar comandos
+          cat > .deployment << 'EOL'
+          [config]
+          command = node server.js
+          EOL
+
+          # Crear package.json simplificado
+          cat > deploy-package.json << 'EOL'
+          {
             "name": "the-matrix-front",
             "version": "1.0.0",
-            "engines": { "node": ">=20.0.0" },
+            "engines": { "node": "18.x" },
             "dependencies": {
-              "@remix-run/express": "^2.16.0",
-              "@remix-run/node": "^2.16.0",
-              "@remix-run/react": "^2.16.0",
-              "@remix-run/serve": "^2.16.0",
               "compression": "^1.7.4",
-              "express": "^4.18.2",
-              "react": "^18.2.0",
-              "react-dom": "^18.2.0",
-              "isbot": "^4.1.0"
+              "express": "^4.18.2"
             },
             "scripts": {
               "start": "node server.js"
             }
-          }' > deploy-package.json
+          }
+          EOL
 
           # Asegurar que la estructura de directorios es correcta
-          mkdir -p deploy
-          cp -r build deploy/
-          cp -r public deploy/ || true
+          mkdir -p deploy/public
+          cp -r build/client/* deploy/public/ || true
           cp server.js deploy/
           cp web.config deploy/
+          cp .deployment deploy/
           cp deploy-package.json deploy/package.json
 
           # Verificar estructura del despliegue
           echo "Deployment structure:"
           ls -la deploy
-          echo "Build directory structure:"
-          ls -la deploy/build || echo "No build directory found!"
+          echo "Public directory structure:"
+          ls -la deploy/public || echo "No public directory content found!"
           
           # Instalar dependencias de producción
-          cd deploy && npm install --production
+          cd deploy && npm install --omit=dev
 
       - name: Zip artifact for deployment
         run: cd deploy && zip -r ../release.zip .
