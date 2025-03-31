@@ -8,7 +8,8 @@
     "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
     "start": "node server.js",
     "start:remix": "remix-serve ./build/server/index.js",
-    "typecheck": "tsc"
+    "typecheck": "tsc",
+    "type": "module"
   },
   "dependencies": {
     "@remix-run/node": "2.16.0",
