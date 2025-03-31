@@ -1,4 +1,4 @@
-name: Build and deploy Node.js app to Azure Web App - arswFront
+name: Deploy Remix App to Azure Web App
 
 on:
   push:
@@ -7,13 +7,15 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-
+    environment:
+      name: 'Production'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+    
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Install PNPM
         uses: pnpm/action-setup@v4
@@ -34,217 +36,6 @@ jobs:
         env:
           NODE_ENV: production
 
-      - name: Create diagnostic server
-        run: |
-          # Crear un servidor express minimalista para diagnóstico
-          cat > server.js << 'EOL'
-          // Verificar cada módulo individualmente para detectar cuál falla
-          console.log('Iniciando servidor...');
-          console.log('Verificando módulos...');
-
-          try {
-            console.log('Cargando path...');
-            const path = require('path');
-            console.log('Path cargado correctamente');
-            
-            console.log('Cargando fs...');
-            const fs = require('fs');
-            console.log('Fs cargado correctamente');
-            
-            console.log('Cargando express...');
-            const express = require('express');
-            console.log('Express cargado correctamente');
-            
-            console.log('Cargando compression...');
-            const compression = require('compression');
-            console.log('Compression cargado correctamente');
-            
-            try {
-              console.log('Intentando cargar @remix-run/express...');
-              const remix = require('@remix-run/express');
-              console.log('@remix-run/express cargado correctamente');
-            } catch (remixError) {
-              console.error('Error cargando @remix-run/express:', remixError);
-            }
-            
-            // Configuración básica del servidor
-            const app = express();
-            app.use(compression());
-
-            // Mostrar información del entorno
-            app.get('/info', (req, res) => {
-              const info = {
-                nodeVersion: process.version,
-                platform: process.platform,
-                env: process.env.NODE_ENV,
-                cwd: process.cwd(),
-                files: fs.readdirSync('.'),
-                modules: fs.existsSync('node_modules') ? 
-                  fs.readdirSync('node_modules') : 'No node_modules',
-                publicFiles: fs.existsSync('public') ? 
-                  fs.readdirSync('public') : 'No public directory'
-              };
-              res.json(info);
-            });
-
-            // Servir archivos estáticos si existen
-            if (fs.existsSync('public')) {
-              app.use(express.static('public'));
-            }
-
-            // Ruta por defecto
-            app.get('*', (req, res) => {
-              res.send(`
-                <html>
-                  <head><title>Diagnóstico</title></head>
-                  <body>
-                    <h1>Servidor de Diagnóstico</h1>
-                    <p>El servidor está funcionando correctamente.</p>
-                    <p>Node.js versión: ${process.version}</p>
-                    <p>Visita <a href="/info">/info</a> para más detalles.</p>
-                  </body>
-                </html>
-              `);
-            });
-
-            const port = process.env.PORT || 8080;
-            app.listen(port, () => {
-              console.log(`Servidor Express iniciado en puerto ${port}`);
-            });
-            
-          } catch (error) {
-            console.error('Error iniciando el servidor:', error);
-          }
-          EOL
-
-          # Crear web.config
-          cat > web.config << 'EOL'
-          <?xml version="1.0" encoding="utf-8"?>
-          <configuration>
-            <system.webServer>
-              <webSocket enabled="false" />
-              <handlers>
-                <add name="iisnode" path="server.js" verb="*" modules="iisnode"/>
-              </handlers>
-              <rewrite>
-                <rules>
-                  <rule name="StaticContent">
-                    <action type="Rewrite" url="public{REQUEST_URI}"/>
-                  </rule>
-                  <rule name="DynamicContent">
-                    <conditions>
-                      <add input="{REQUEST_FILENAME}" matchType="IsFile" negate="True"/>
-                    </conditions>
-                    <action type="Rewrite" url="server.js"/>
-                  </rule>
-                </rules>
-              </rewrite>
-              <iisnode
-                nodeProcessCommandLine="node"
-                watchedFiles="web.config;*.js"
-                loggingEnabled="true"
-                debuggingEnabled="true"
-              />
-            </system.webServer>
-          </configuration>
-          EOL
-
-          # Package.json simplificado con todas las dependencias
-          cat > deploy-package.json << 'EOL'
-          {
-            "name": "the-matrix-front",
-            "version": "1.0.0",
-            "engines": { "node": "22.x" },
-            "dependencies": {
-              "express": "^4.18.2",
-              "compression": "^1.7.4"
-            },
-            "scripts": {
-              "start": "node server.js"
-            }
-          }
-          EOL
-
-      - name: Create deployment package
-        run: |
-          # Crear estructura de despliegue simple
-          mkdir -p deploy/public
-          
-          # Copiar los archivos estáticos del build
-          if [ -d "build/client" ]; then
-            echo "Copiando archivos estáticos de build/client..."
-            cp -r build/client/* deploy/public/ || echo "No se pudieron copiar los archivos de build/client"
-          fi
-          
-          # Copiar public si existe
-          if [ -d "public" ]; then
-            echo "Copiando archivos estáticos de public..."
-            cp -r public/* deploy/public/ || echo "No se pudieron copiar los archivos de public"
-          fi
-          
-          # Copiar la configuración del servidor
-          cp server.js deploy/
-          cp web.config deploy/
-          cp deploy-package.json deploy/package.json
-          
-          # Mostrar la estructura del paquete
-          echo "Estructura del paquete de despliegue:"
-          ls -la deploy
-          
-          # Instalar dependencias en el paquete de despliegue
-          cd deploy
-          echo "Instalando dependencias en el paquete de despliegue..."
-          npm install --production
-          
-          # Verificar la instalación de dependencias
-          echo "Dependencias instaladas:"
-          ls -la node_modules
-
-      - name: Zip artifact for deployment
-        run: cd deploy && zip -r ../release.zip .
-
-      - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v4
-        with:
-          name: node-app
-          path: release.zip
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    environment:
-      name: 'Production'
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-    
-    steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v4
-        with:
-          name: node-app
-
-      - name: Unzip artifact for deployment
-        run: unzip release.zip
-      
-      # Paso para detener cualquier despliegue en curso
-      - name: Stop ongoing deployments
-        shell: bash
-        run: |
-          # Crear archivo XML para detener el sitio
-          echo '<?xml version="1.0" encoding="utf-8"?><stop/>' > stop-site.xml
-          
-          # Intentar usar la API de Kudu para detener despliegues en curso
-          SCM_URL="https://arswfront-d4eddaeff8b9b3dz.brazilsouth-01.azurewebsites.net"
-          
-          echo "Attempting to stop any ongoing deployments..."
-          curl -u "${{ secrets.AZURE_PUBLISH_USERNAME }}:${{ secrets.AZURE_PUBLISH_PASSWORD }}" \
-            -H "Content-Type: application/xml" \
-            --data-binary @stop-site.xml \
-            "${SCM_URL}/api/stop" || true
-          
-          echo "Waiting for site to stop..."
-          sleep 15
-      
-      # Despliegue a Azure Web App
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
