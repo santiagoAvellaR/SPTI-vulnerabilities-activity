@@ -40,10 +40,37 @@ jobs:
       - name: Create deployment package
         run: |
           mkdir deployment
-          cp -r build/* deployment/ || true
+          cp -r build deployment/ || true
           cp -r public deployment/ || true
           cp package.json pnpm-lock.yaml server.js deployment/
-          cp .env.example deployment/.env
+          
+          # Create a modified package.json for Azure
+          node -e "const pkg = require('./package.json'); pkg.scripts = pkg.scripts || {}; pkg.scripts.start = 'node server.js'; require('fs').writeFileSync('./deployment/package.json', JSON.stringify(pkg, null, 2));"
+          
+          # Create web.config for Azure
+          echo '<?xml version="1.0" encoding="utf-8"?>
+          <configuration>
+            <system.webServer>
+              <handlers>
+                <add name="iisnode" path="server.js" verb="*" modules="iisnode" />
+              </handlers>
+              <rewrite>
+                <rules>
+                  <rule name="Node.js" patternSyntax="ECMAScript" stopProcessing="true">
+                    <match url=".*" />
+                    <conditions>
+                      <add input="{REQUEST_FILENAME}" matchType="IsFile" negate="true" />
+                    </conditions>
+                    <action type="Rewrite" url="server.js" />
+                  </rule>
+                </rules>
+              </rewrite>
+              <iisnode nodeProcessCommandLine="node" watchedFiles="*.js;node_modules\*;routes\*.js;views\*.jade" />
+            </system.webServer>
+          </configuration>' > deployment/web.config
+          
+          # Create a .env file with correct port settings
+          echo 'PORT=8080' > deployment/.env
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
