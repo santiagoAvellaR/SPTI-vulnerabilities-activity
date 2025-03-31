@@ -40,7 +40,7 @@ jobs:
           ls -la build
           find build -type d | sort
           echo "Server build files:"
-          find build/server -type f | sort
+          find build/server -type f | sort || echo "No server directory found"
           echo "Client build files:"
           find build -path "*/public/build" -type d 2>/dev/null && find build -path "*/public/build" -type d -exec ls -la {} \; || echo "No public/build directory found"
           echo "App directory structure:"
@@ -272,40 +272,24 @@ jobs:
       - name: Unzip artifact for deployment
         run: unzip release.zip
       
-      # Paso para detener cualquier despliegue en curso
+      # Paso para detener cualquier despliegue en curso (corregido)
       - name: Stop ongoing deployments
+        shell: bash
         run: |
-          # Extraer credenciales del perfil de publicación
-          PUBLISH_PROFILE="${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_FRONTARSW }}"
-          USERNAME=$(echo "$PUBLISH_PROFILE" | grep -o 'userName="[^"]*"' | cut -d'"' -f2 || echo "")
-          PASSWORD=$(echo "$PUBLISH_PROFILE" | grep -o 'userPWD="[^"]*"' | cut -d'"' -f2 || echo "")
+          # Crear archivo XML para detener el sitio
+          echo '<?xml version="1.0" encoding="utf-8"?><stop/>' > stop-site.xml
           
-          # Intentar determinar la URL base de Kudu
-          SCM_URL=$(echo "$PUBLISH_PROFILE" | grep -o 'publishUrl="[^"]*"' | cut -d'"' -f2 || echo "")
+          # Intentar usar la API de Kudu para detener despliegues en curso
+          SCM_URL="https://arswfront-d4eddaeff8b9b3dz.brazilsouth-01.azurewebsites.net"
           
-          if [ -n "$USERNAME" ] && [ -n "$PASSWORD" ]; then
-            echo "Attempting to stop any ongoing deployments..."
-            # Intentar detener directamente el sitio
-            echo '<?xml version="1.0" encoding="utf-8"?><stop/>' > stop-site.xml
-            
-            # Usar la URL si está disponible, o intentar construirla
-            if [ -n "$SCM_URL" ]; then
-              KUDU_URL="https://$SCM_URL"
-            else
-              KUDU_URL="https://arswfront.scm.azurewebsites.net"
-            fi
-            
-            curl -u "$USERNAME:$PASSWORD" \
-              -H "Content-Type: application/xml" \
-              --data-binary @stop-site.xml \
-              "$KUDU_URL/api/stop" || true
-            
-            # Esperar unos segundos
-            echo "Waiting for site to stop..."
-            sleep 15
-          else
-            echo "Could not extract credentials from publish profile, skipping stop operation"
-          fi
+          echo "Attempting to stop any ongoing deployments..."
+          curl -u "${{ secrets.AZURE_PUBLISH_USERNAME }}:${{ secrets.AZURE_PUBLISH_PASSWORD }}" \
+            -H "Content-Type: application/xml" \
+            --data-binary @stop-site.xml \
+            "${SCM_URL}/api/stop" || true
+          
+          echo "Waiting for site to stop..."
+          sleep 15
       
       # Primer intento de despliegue
       - name: Deploy to Azure Web App
@@ -340,51 +324,35 @@ jobs:
       # Último intento con reinicio del sitio
       - name: Final attempt with site restart
         if: steps.deploy-to-webapp.outcome != 'success' && steps.deploy-retry.outcome != 'success'
+        shell: bash
         run: |
           echo "Deployment attempts failed, trying one more time after site restart..."
           
-          # Extraer credenciales del perfil de publicación
-          PUBLISH_PROFILE="${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_FRONTARSW }}"
-          USERNAME=$(echo "$PUBLISH_PROFILE" | grep -o 'userName="[^"]*"' | cut -d'"' -f2 || echo "")
-          PASSWORD=$(echo "$PUBLISH_PROFILE" | grep -o 'userPWD="[^"]*"' | cut -d'"' -f2 || echo "")
+          # Crear archivos XML para los comandos
+          echo '<?xml version="1.0" encoding="utf-8"?><stop/>' > stop-site.xml
+          echo '<?xml version="1.0" encoding="utf-8"?><start/>' > start-site.xml
           
-          # Intentar determinar la URL base de Kudu
-          SCM_URL=$(echo "$PUBLISH_PROFILE" | grep -o 'publishUrl="[^"]*"' | cut -d'"' -f2 || echo "")
+          # URL del servicio Kudu
+          SCM_URL="https://arswfront-d4eddaeff8b9b3dz.brazilsouth-01.azurewebsites.net"
           
-          if [ -n "$USERNAME" ] && [ -n "$PASSWORD" ]; then
-            # Crear archivos XML para los comandos
-            echo '<?xml version="1.0" encoding="utf-8"?><stop/>' > stop-site.xml
-            echo '<?xml version="1.0" encoding="utf-8"?><start/>' > start-site.xml
-            
-            # Usar la URL si está disponible, o intentar construirla
-            if [ -n "$SCM_URL" ]; then
-              KUDU_URL="https://$SCM_URL"
-            else
-              KUDU_URL="https://arswfront.scm.azurewebsites.net"
-            fi
-            
-            # Ciclo completo de reinicio
-            echo "Stopping the site..."
-            curl -u "$USERNAME:$PASSWORD" \
-              -H "Content-Type: application/xml" \
-              --data-binary @stop-site.xml \
-              "$KUDU_URL/api/stop" || true
-            
-            echo "Waiting 20 seconds..."
-            sleep 20
-            
-            echo "Starting the site..."
-            curl -u "$USERNAME:$PASSWORD" \
-              -H "Content-Type: application/xml" \
-              --data-binary @start-site.xml \
-              "$KUDU_URL/api/start" || true
-            
-            echo "Waiting 10 seconds before final deployment attempt..."
-            sleep 10
-          else
-            echo "Could not extract credentials from publish profile, skipping restart operation"
-            sleep 30
-          fi
+          # Ciclo completo de reinicio
+          echo "Stopping the site..."
+          curl -u "${{ secrets.AZURE_PUBLISH_USERNAME }}:${{ secrets.AZURE_PUBLISH_PASSWORD }}" \
+            -H "Content-Type: application/xml" \
+            --data-binary @stop-site.xml \
+            "${SCM_URL}/api/stop" || true
+          
+          echo "Waiting 20 seconds..."
+          sleep 20
+          
+          echo "Starting the site..."
+          curl -u "${{ secrets.AZURE_PUBLISH_USERNAME }}:${{ secrets.AZURE_PUBLISH_PASSWORD }}" \
+            -H "Content-Type: application/xml" \
+            --data-binary @start-site.xml \
+            "${SCM_URL}/api/start" || true
+          
+          echo "Waiting 10 seconds before final deployment attempt..."
+          sleep 10
       
       # Intento final de despliegue después del reinicio
       - name: Final deployment attempt
