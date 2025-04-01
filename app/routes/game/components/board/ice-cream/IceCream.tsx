@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import {ws, sendMessage} from "~/services/websocket";
+import { ws, sendMessage } from "~/services/websocket";
 import "./IceCream.css";
 
 type IceCreamProps = {
@@ -10,8 +10,33 @@ type IceCreamProps = {
 
 export default function IceCream({ playerId, matchId, position }: IceCreamProps) {
   const [direction, setDirection] = useState("down");
+  const [playerPosition, setPlayerPosition] = useState(position); // Nueva posición reactiva
   const holdTimeout = useRef<NodeJS.Timeout | null>(null);
   const moveInterval = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    // Escuchar mensajes del WebSocket
+    const handleMessage = (event: MessageEvent) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.message === "element move" && data.id === playerId) {
+          setPlayerPosition({ x: data.xPosition, y: data.yPosition });
+        }
+      } catch (error) {
+        console.error("Error parsing WebSocket message:", error);
+      }
+    };
+
+    if (ws) {
+      ws.addEventListener("message", handleMessage);
+    }
+
+    return () => {
+      if (ws) {
+        ws.removeEventListener("message", handleMessage);
+      }
+    };
+  }, [playerId]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -70,10 +95,10 @@ export default function IceCream({ playerId, matchId, position }: IceCreamProps)
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [direction, sendMessage]);
+  }, [direction]);
 
   return (
-    <div className="IceCream" style={{ left: `${position.x * 40}px`, top: `${position.y * 40}px` }}>
+    <div className="IceCream" style={{ left: `${playerPosition.x * 40}px`, top: `${playerPosition.y * 40}px` }}>
       <img src={`/assets/player-${playerId}.webp`} alt={`Player ${playerId}`} />
     </div>
   );
