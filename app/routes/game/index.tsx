@@ -52,25 +52,25 @@ export default function GameScreen() {
     "board": {
         "size": { "rows": 16, "cols": 16 },
         "entities": [
-            { "id": "host", "type": "player", "position": { "x": 9, "y": 1 } },
-            { "id": "guest", "type": "player", "position": { "x": 9, "y": 14 } },
+            // { "id": "host", "type": "player", "position": { "x": 9, "y": 1 } },
+            // { "id": "guest", "type": "player", "position": { "x": 9, "y": 14 } },
 
-            { "id": "enemy-001", "type": "enemy", "subtype": "troll", "position": { "x": 2, "y": 4 } },
-            { "id": "enemy-002", "type": "enemy", "subtype": "goblin", "position": { "x": 2, "y": 12 } },
-            { "id": "enemy-003", "type": "enemy", "subtype": "slime", "position": { "x": 14, "y": 4 } },
-            { "id": "enemy-004", "type": "enemy", "subtype": "dragon", "position": { "x": 14, "y": 12 } },
+            //{ "id": "enemy-001", "type": "enemy", "subtype": "troll", "position": { "x": 2, "y": 4 } },
+            //{ "id": "enemy-002", "type": "enemy", "subtype": "goblin", "position": { "x": 2, "y": 12 } },
+            //{ "id": "enemy-003", "type": "enemy", "subtype": "slime", "position": { "x": 14, "y": 4 } },
+            //{ "id": "enemy-004", "type": "enemy", "subtype": "dragon", "position": { "x": 14, "y": 12 } },
 
             { "id": "fruit-001", "type": "fruit", "subtype": "banana", "position": { "x": 4, "y": 5 } },
             { "id": "fruit-002", "type": "fruit", "subtype": "banana", "position": { "x": 4, "y": 6 } },
             { "id": "fruit-003", "type": "fruit", "subtype": "banana", "position": { "x": 4, "y": 7 } },
-            { "id": "fruit-004", "type": "fruit", "subtype": "banana", "position": { "x": 4, "y": 8 } },
+            { "id": "fruit-004", "type": "fruit", "subtype": "banana", "position": { "x": 4, "y": 8 } }
 
-            { "id": "ice-001", "type": "ice_block", "subtype": "solid", "position": { "x": 5, "y": 5 } },
-            { "id": "ice-002", "type": "ice_block", "subtype": "breakable", "position": { "x": 5, "y": 6 } },
-            { "id": "ice-003", "type": "ice_block", "subtype": "thin", "position": { "x": 5, "y": 7 } },
-            { "id": "ice-004", "type": "ice_block", "subtype": "solid", "position": { "x": 6, "y": 5 } },
-            { "id": "ice-005", "type": "ice_block", "subtype": "breakable", "position": { "x": 6, "y": 6 } },
-            { "id": "ice-006", "type": "ice_block", "subtype": "thin", "position": { "x": 6, "y": 7 } }
+            // { "id": "ice-001", "type": "ice_block", "subtype": "solid", "position": { "x": 5, "y": 5 } },
+            // { "id": "ice-002", "type": "ice_block", "subtype": "breakable", "position": { "x": 5, "y": 6 } },
+            // { "id": "ice-003", "type": "ice_block", "subtype": "thin", "position": { "x": 5, "y": 7 } },
+            // { "id": "ice-004", "type": "ice_block", "subtype": "solid", "position": { "x": 6, "y": 5 } },
+            // { "id": "ice-005", "type": "ice_block", "subtype": "breakable", "position": { "x": 6, "y": 6 } },
+            // { "id": "ice-006", "type": "ice_block", "subtype": "thin", "position": { "x": 6, "y": 7 } }
         ]
     }
 };
