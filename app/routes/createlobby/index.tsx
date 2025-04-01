@@ -6,7 +6,6 @@ import IceCreamSelector from "./components/IceCreamSelector";
 import GameControls from "./components/GameControls";
 import api from "~/services/api";
 import "./styles.css";
-import { Console } from "node:console";
 
 
 // TODO tipar todo
@@ -136,8 +135,11 @@ export default function Lobby() {
         ? (player1Ready && player1IceCream) // Solo mode only needs player 1 ready
         : (player1Ready && player2Ready && player1IceCream && player2IceCream); // Two players need both ready
 
+
+    
     // Countdown timer when players are ready
     useEffect(() => {
+        console.log("isGameReady:", isGameReady);
         // Solo iniciar el temporizador si el juego no ha comenzado ya
         if (gameStarted) return;
 
@@ -148,8 +150,8 @@ export default function Lobby() {
                     if (prev <= 1) {
                         clearInterval(timer);
                         // Marcar como iniciado y navegar
+                        navigate("/game");
                         setGameStarted(true);
-                        navigate(createGameUrl());
                         return 0;
                     }
                     return prev - 1;
@@ -159,16 +161,6 @@ export default function Lobby() {
         return () => { clearInterval(timer); setCountdown(3) };
     }, [isGameReady, navigate, gameStarted]);
 
-    // Function to create the game URL with appropriate parameters
-    const createGameUrl = () => {
-        const p1Id = player1IceCream?.id;
-        const p2Id = player2IceCream?.id;
-
-        if (!p1Id) return ""; // Safety check
-
-        return `/game?player1=${p1Id}&player2=${p2Id || 'ai'}&p1name=${encodeURIComponent(player1Name)}&p2name=${encodeURIComponent(player2Name)}&solo=${isSoloPlayer}&room=${roomCode}`;
-    };
-
     const handleStartGame = () => {
         // Evitar iniciar el juego más de una vez
         if (gameStarted) return;
@@ -177,7 +169,7 @@ export default function Lobby() {
             // For solo mode, only check if player 1 is ready
             if (player1Ready && player1IceCream) {
                 setGameStarted(true);
-                navigate(createGameUrl());
+                navigate("/game");
             } else {
                 alert("Please select your character and click Ready to start");
             }
@@ -185,7 +177,7 @@ export default function Lobby() {
             // For two-player mode, check both players
             if ((player1Ready && player2Ready) && (player1IceCream && player2IceCream)) {
                 setGameStarted(true);
-                navigate(createGameUrl());
+                navigate("/game");
             } else {
                 alert("Both players must select a character and be ready to start");
             }
@@ -203,17 +195,29 @@ export default function Lobby() {
         if (ws) {
             ws.onopen = () => {
                 console.log("WebSocket connection opened successfully here in createlobby ");
-                setPlayerJoining(true);
-                setIsSearching(true);
-                setSearchTime(0);
             };
 
             ws.onmessage = (event) => {
-                console.log("Received message in createlobby:", event.data);
+
+                const message = JSON.parse(event.data);
+                console.log("Received message in createlobby:", message);
+                console.log("Received JSON message two:", message.message);
+                if (message.message === 'match-found') {
+                    console.log("Match found, navigating to game screen");
+                    setPlayer1Ready(true);
+                    setIsSoloPlayer(true);
+                    console.log("Player 1 :", player1IceCream);
+                    // navigate("/game")
+                }
+
+                // const message = JSON.parse(event.data);
+                // console.log("Message type:", message.type);
+                // console.log("Received message event.data :", event.data);
+
+
             };
 
             setIsSearching(true);
-            navigate("/game")
         } else {
             setError("Failed to create WebSocket connection");
         }
