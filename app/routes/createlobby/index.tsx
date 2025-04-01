@@ -1,4 +1,4 @@
-import { createWebSocketConnection } from "~/services/api";
+import { createWebSocketConnection } from "~/services/websocket";
 import { useState, useEffect } from "react";
 import { useNavigate } from "@remix-run/react";
 import { useUser } from "~/userContext";
@@ -6,6 +6,9 @@ import IceCreamSelector from "./components/IceCreamSelector";
 import GameControls from "./components/GameControls";
 import api from "~/services/api";
 import "./styles.css";
+
+
+// TODO tipar todo
 
 const iceCreams = [
     { id: 1, name: "Vanilla", image: "/vainilla.png" },
@@ -16,13 +19,17 @@ const iceCreams = [
     { id: 6, name: "verde", image: "/verde.png" }
 ];
 
-const connectionWebSocket = (userData) => {
+const connectionWebSocket = (userData, roomCode) => {
     const matchDetails = { level: 3, map: "desert" };
     // Codificamos el objeto JSON para la URL
+    console.log("userData solo user:", userData);
+    console.log("userData conecctionwebsocket:", userData?.userId);
     const messageParam = encodeURIComponent(JSON.stringify(matchDetails));
-    const wsURI = `/ws/matchmaking?userId=${userData?.userId}&message=${messageParam}`;
+    const wssURI = `/ws/matchmaking/${roomCode}`;
+    // const wsURI = `/ws/matchmaking?userId=${userData?.userId}&message=${messageParam}`;
     try {
-        const ws = createWebSocketConnection(wsURI);
+        // const ws = createWebSocketConnection(wsURI);
+        const ws = createWebSocketConnection(wssURI);
         return ws;
     } catch (error) {
         console.error("Error creating WebSocket connection", error);
@@ -58,24 +65,24 @@ export default function Lobby() {
     const [gameStarted, setGameStarted] = useState(false);
 
     // Efecto para mostrar al segundo jugador después de 10 segundos
-    useEffect(() => {
-        // Primero mostramos la animación de "uniendo" a los 8 segundos
-        const joiningTimer = setTimeout(() => {
-            console.log("Player joining animation started");
-            setPlayerJoining(true);
-        }, 3000);
+    // useEffect(() => {
+    //     // Primero mostramos la animación de "uniendo" a los 8 segundos
+    //     const joiningTimer = setTimeout(() => {
+    //         console.log("Player joining animation started");
+    //         setPlayerJoining(true);
+    //     }, 3000);
 
-        // Luego mostramos el jugador completo a los 10 segundos
-        const showPlayerTimer = setTimeout(() => {
-            console.log("Showing second player");
-            setShowSecondPlayer(true);
-        }, 5000);
+    //     // Luego mostramos el jugador completo a los 10 segundos
+    //     const showPlayerTimer = setTimeout(() => {
+    //         console.log("Showing second player");
+    //         setShowSecondPlayer(true);
+    //     }, 5000);
 
-        return () => {
-            clearTimeout(joiningTimer);
-            clearTimeout(showPlayerTimer);
-        };
-    }, []);
+    //     return () => {
+    //         clearTimeout(joiningTimer);
+    //         clearTimeout(showPlayerTimer);
+    //     };
+    // }, []);
 
     // Cargar el código de sala cuando el componente se monte
     useEffect(() => {
@@ -128,8 +135,11 @@ export default function Lobby() {
         ? (player1Ready && player1IceCream) // Solo mode only needs player 1 ready
         : (player1Ready && player2Ready && player1IceCream && player2IceCream); // Two players need both ready
 
+
+    
     // Countdown timer when players are ready
     useEffect(() => {
+        console.log("isGameReady:", isGameReady);
         // Solo iniciar el temporizador si el juego no ha comenzado ya
         if (gameStarted) return;
 
@@ -140,8 +150,8 @@ export default function Lobby() {
                     if (prev <= 1) {
                         clearInterval(timer);
                         // Marcar como iniciado y navegar
+                        navigate("/game");
                         setGameStarted(true);
-                        navigate(createGameUrl());
                         return 0;
                     }
                     return prev - 1;
@@ -151,16 +161,6 @@ export default function Lobby() {
         return () => { clearInterval(timer); setCountdown(3) };
     }, [isGameReady, navigate, gameStarted]);
 
-    // Function to create the game URL with appropriate parameters
-    const createGameUrl = () => {
-        const p1Id = player1IceCream?.id;
-        const p2Id = player2IceCream?.id;
-
-        if (!p1Id) return ""; // Safety check
-
-        return `/game?player1=${p1Id}&player2=${p2Id || 'ai'}&p1name=${encodeURIComponent(player1Name)}&p2name=${encodeURIComponent(player2Name)}&solo=${isSoloPlayer}&room=${roomCode}`;
-    };
-
     const handleStartGame = () => {
         // Evitar iniciar el juego más de una vez
         if (gameStarted) return;
@@ -169,7 +169,7 @@ export default function Lobby() {
             // For solo mode, only check if player 1 is ready
             if (player1Ready && player1IceCream) {
                 setGameStarted(true);
-                navigate(createGameUrl());
+                navigate("/game");
             } else {
                 alert("Please select your character and click Ready to start");
             }
@@ -177,7 +177,7 @@ export default function Lobby() {
             // For two-player mode, check both players
             if ((player1Ready && player2Ready) && (player1IceCream && player2IceCream)) {
                 setGameStarted(true);
-                navigate(createGameUrl());
+                navigate("/game");
             } else {
                 alert("Both players must select a character and be ready to start");
             }
@@ -190,9 +190,33 @@ export default function Lobby() {
 
     const handleFindOpponent = () => {
 
-        navigate("/game")
-        const ws = connectionWebSocket(userData);
+        const ws = connectionWebSocket(userData, roomCode);
+        console.log("WebSocket instance in findOponent:", ws);
         if (ws) {
+            ws.onopen = () => {
+                console.log("WebSocket connection opened successfully here in createlobby ");
+            };
+
+            ws.onmessage = (event) => {
+
+                const message = JSON.parse(event.data);
+                console.log("Received message in createlobby:", message);
+                console.log("Received JSON message two:", message.message);
+                if (message.message === 'match-found') {
+                    console.log("Match found, navigating to game screen");
+                    setPlayer1Ready(true);
+                    setIsSoloPlayer(true);
+                    console.log("Player 1 :", player1IceCream);
+                    // navigate("/game")
+                }
+
+                // const message = JSON.parse(event.data);
+                // console.log("Message type:", message.type);
+                // console.log("Received message event.data :", event.data);
+
+
+            };
+
             setIsSearching(true);
         } else {
             setError("Failed to create WebSocket connection");
