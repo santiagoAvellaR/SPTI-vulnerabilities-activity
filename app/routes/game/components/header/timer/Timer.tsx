@@ -39,29 +39,25 @@ export default function Timer({ isRunning, setIsRunning, minutes, seconds }: Tim
     if (!isRunning) return;
 
     const timeInterval = setInterval(() => {
-      setCurrentSeconds((prev) => {
-        let newMinutes = currentMinutes;
-        let newSeconds = prev - 1;
-
-        if (newSeconds < 0) {
-          newSeconds = 59;
-          newMinutes--;
+      setCurrentSeconds((prevSeconds) => {
+        if (prevSeconds === 0) {
+          return 59;
         }
+        return prevSeconds - 1;
+      });
 
-        if (newMinutes < 0) {
-          newMinutes = 0;
-          newSeconds = 0;
-          setIsRunning(false);
+      setCurrentMinutes((prevMinutes) => {
+        if (prevMinutes === 0 && currentSeconds === 0) {
+          setIsRunning(false); // ✅ Se actualiza el estado en otro ciclo de renderizado
           clearInterval(timeInterval);
+          return 0;
         }
-
-        setCurrentMinutes(newMinutes);
-        return newSeconds;
+        return prevMinutes > 0 && currentSeconds === 0 ? prevMinutes - 1 : prevMinutes;
       });
     }, 1000);
 
     return () => clearInterval(timeInterval);
-  }, [isRunning, currentMinutes, setIsRunning]);
+  }, [isRunning, currentSeconds, setIsRunning]);
 
   // Obtener dígitos individuales
   const tensMinutes = Math.floor(currentMinutes / 10);

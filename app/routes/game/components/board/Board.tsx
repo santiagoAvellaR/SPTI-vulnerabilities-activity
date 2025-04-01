@@ -23,13 +23,38 @@ export default function Board({ boardData, matchId, hostId, guestId, hostIsAlive
       {boardData.entities.map((entity) => {
         switch (entity.type) {
           case "player":
-            return entity.id ? <IceCream playerId={entity.id === "host" ? hostId : guestId} matchId={matchId} position={entity.position} /> : null;
+            return entity.id ? (
+              <IceCream 
+                key={entity.id} 
+                playerId={entity.id === "host" ? hostId : guestId} 
+                matchId={matchId} 
+                position={entity.position} 
+              />
+            ) : null;
           case "enemy":
-            return entity.subtype? <Enemy subtype={entity.subtype} position={entity.position} /> : null;
+            return entity.subtype ? (
+              <Enemy 
+                key={entity.id || JSON.stringify(entity.position)} 
+                subtype={entity.subtype} 
+                position={entity.position} 
+              />
+            ) : null;
           case "fruit":
-            return entity.subtype? <Fruit subtype={entity.subtype} position={entity.position} /> : null;
+            return entity.subtype ? (
+              <Fruit 
+                key={entity.id || JSON.stringify(entity.position)} 
+                subtype={entity.subtype} 
+                position={entity.position} 
+              />
+            ) : null;
           case "ice_block":
-            return entity.subtype? <IceBlock subtype={entity.subtype} position={entity.position} /> : null;
+            return entity.subtype ? (
+              <IceBlock 
+                key={entity.id || JSON.stringify(entity.position)} 
+                subtype={entity.subtype} 
+                position={entity.position} 
+              />
+            ) : null;
           default:
             return null;
         }
