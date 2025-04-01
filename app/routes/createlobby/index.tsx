@@ -1,4 +1,4 @@
-import { createWebSocketConnection } from "~/services/api";
+import { createWebSocketConnection } from "~/services/websocket";
 import { useState, useEffect } from "react";
 import { useNavigate } from "@remix-run/react";
 import { useUser } from "~/userContext";
@@ -213,7 +213,7 @@ export default function Lobby() {
             };
 
             setIsSearching(true);
-            navigate("/game")
+            // navigate("/game")
         } else {
             setError("Failed to create WebSocket connection");
         }

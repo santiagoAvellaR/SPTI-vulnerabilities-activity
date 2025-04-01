@@ -8,7 +8,7 @@ type TimerProps = {
   seconds: number;
 };
 
-const Timer: React.FC<TimerProps> = ({ isRunning, setIsRunning, minutes, seconds }) => {
+export default function Timer({ isRunning, setIsRunning, minutes, seconds }: TimerProps) {
   const frames = [
     "/game-screen/header/clock/clock-0.webp",
     "/game-screen/header/clock/clock-1.webp",
@@ -29,8 +29,8 @@ const Timer: React.FC<TimerProps> = ({ isRunning, setIsRunning, minutes, seconds
   useEffect(() => {
     if (!isRunning) return;
     const frameInterval = setInterval(() => {
-      setClockFrame((prevFrame) => (prevFrame + 1) % frames.length);
-    }, 100);
+      setClockFrame((prev) => (prev + 1) % frames.length);
+    }, 80);
     return () => clearInterval(frameInterval);
   }, [isRunning]);
 
@@ -39,9 +39,9 @@ const Timer: React.FC<TimerProps> = ({ isRunning, setIsRunning, minutes, seconds
     if (!isRunning) return;
 
     const timeInterval = setInterval(() => {
-      setCurrentSeconds((prevSeconds) => {
+      setCurrentSeconds((prev) => {
         let newMinutes = currentMinutes;
-        let newSeconds = prevSeconds - 1;
+        let newSeconds = prev - 1;
 
         if (newSeconds < 0) {
           newSeconds = 59;
@@ -51,7 +51,7 @@ const Timer: React.FC<TimerProps> = ({ isRunning, setIsRunning, minutes, seconds
         if (newMinutes < 0) {
           newMinutes = 0;
           newSeconds = 0;
-          setIsRunning(false); // Detener cuando llega a 0
+          setIsRunning(false);
           clearInterval(timeInterval);
         }
 
@@ -71,9 +71,7 @@ const Timer: React.FC<TimerProps> = ({ isRunning, setIsRunning, minutes, seconds
 
   return (
     <div className="time-container">
-      {/* Reloj Animado */}
       <img src={frames[clockFrame]} alt="Reloj animado" className="clock-animation" />
-      {/* Tiempo con imágenes */}
       <img className="clock-digits" src={`${digitsRoute}${tensMinutes}.webp`} alt={`Minutos decena: ${tensMinutes}`} />
       <img className="clock-digits" src={`${digitsRoute}${onesMinutes}.webp`} alt={`Minutos unidad: ${onesMinutes}`} />
       <img className="clock-digits" src="/game-screen/header/digits/colon.webp" alt="Dos puntos" />
@@ -81,6 +79,4 @@ const Timer: React.FC<TimerProps> = ({ isRunning, setIsRunning, minutes, seconds
       <img className="clock-digits" src={`${digitsRoute}${onesSeconds}.webp`} alt={`Segundos unidad: ${onesSeconds}`} />
     </div>
   );
-};
-
-export default Timer;
+}

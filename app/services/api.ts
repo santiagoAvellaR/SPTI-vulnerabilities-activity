@@ -34,32 +34,31 @@ api.interceptors.response.use(
 );
 
 
-export function createWebSocketConnection(path = '') {
-    // Permite conectar a un path específico en el WS_BASE_URL
-    const wsUrl = `${WS_BASE_URL}${path}`;
-    console.log('Connecting to WebSocket url:', wsUrl);
-    ws = new WebSocket(wsUrl);
-    console.log('WebSocket instance created one:', ws);
+// export function createWebSocketConnection(path = '') {
+//     // Permite conectar a un path específico en el WS_BASE_URL
+//     const wsUrl = `${WS_BASE_URL}${path}`;
+//     console.log('Connecting to WebSocket url:', wsUrl);
+//     ws = new WebSocket(wsUrl);
+//     console.log('WebSocket instance created one:', ws);
 
-    ws.onopen = () => {
-        console.log('WebSocket connection opened:', wsUrl);
-        
-    };
+//     ws.onopen = () => {
+//         console.log('WebSocket connection opened:', wsUrl);       
+//     };
 
-    ws.onclose = (event) => {
-        console.log('WebSocket connection closed:', event);
-    };
+//     ws.onclose = (event) => {
+//         console.log('WebSocket connection closed:', event);
+//     };
 
-    ws.onerror = (error) => {
-        console.error('WebSocket error:', error);
-    };
+//     ws.onerror = (error) => {
+//         console.error('WebSocket error:', error);
+//     };
 
-    ws.onmessage = (message) => {
-        console.log('Received message via WebSocket:', message.data);
-    };
+//     ws.onmessage = (message) => {
+//         console.log('Received message via WebSocket:', message.data);
+//     };
 
-    return ws;
-}
+//     return ws;
+// }
 export default api;
 export { api, BASE_URL, WS_BASE_URL ,ws };
 
