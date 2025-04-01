@@ -50,7 +50,6 @@ export default function GameScreen() {
     },
     "fruits": ["banana", "grape", "watermelon", "orange"],
     "board": {
-<<<<<<< HEAD
         "size": { "rows": 16, "cols": 16 },
         "entities": [
             { "id": "host", "type": "player", "position": { "x": 9, "y": 1 } },
@@ -75,41 +74,6 @@ export default function GameScreen() {
         ]
     }
 };
-    // Header States
-    const [isRunning, setIsRunning] = useState(true);
-    const [scorePlayer1, setScorePlayer1] = useState(0);
-    const [scorePlayer2, setScorePlayer2] = useState(0);
-    const [minutes, setMinutes] = useState(1);
-    const [seconds, setSeconds] = useState(30);
-    const [musicOn, setMusicOn] = useState(true);
-    const [soundEffectsOn, setSoundEffectsOn] = useState(true);
-=======
-      "size": { "rows": 16, "cols": 16 },
-      "entities": [
-        { "type": "player", "id": "host", "position": { "x": 9, "y": 1 } },
-        { "type": "player", "id": "guest", "position": { "x": 9, "y": 14 } },
-
-        { "type": "enemy", "subtype": "troll", "position": { "x": 2, "y": 4 } },
-        { "type": "enemy", "subtype": "goblin", "position": { "x": 2, "y": 12 } },
-        { "type": "enemy", "subtype": "slime", "position": { "x": 14, "y": 4 } },
-        { "type": "enemy", "subtype": "dragon", "position": { "x": 14, "y": 12 } },
-
-        { "type": "fruit", "subtype": "banana", "position": { "x": 4, "y": 5 } },
-        { "type": "fruit", "subtype": "banana", "position": { "x": 4, "y": 6 } },
-        { "type": "fruit", "subtype": "banana", "position": { "x": 4, "y": 7 } },
-        { "type": "fruit", "subtype": "banana", "position": { "x": 4, "y": 8 } },
-
-        { "type": "ice_block", "subtype": "solid", "position": { "x": 5, "y": 5 } },
-        { "type": "ice_block", "subtype": "breakable", "position": { "x": 5, "y": 6 } },
-        { "type": "ice_block", "subtype": "thin", "position": { "x": 5, "y": 7 } },
-        { "type": "ice_block", "subtype": "solid", "position": { "x": 6, "y": 5 } },
-        { "type": "ice_block", "subtype": "breakable", "position": { "x": 6, "y": 6 } },
-        { "type": "ice_block", "subtype": "thin", "position": { "x": 6, "y": 7 } }
-      ]
-    }
-  };
->>>>>>> b04d0daf855a387af70374d3e11745c805fd5c26
-
   // Header States
   const [isRunning, setIsRunning] = useState(true);
   const [scorePlayer1, setScorePlayer1] = useState(0);
