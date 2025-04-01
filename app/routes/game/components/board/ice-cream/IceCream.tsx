@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useWebSocket } from "~/hooks/useWebSocket";
+import {ws, sendMessage} from "~/services/websocket";
 import "./IceCream.css";
 
 type IceCreamProps = {
@@ -9,7 +9,6 @@ type IceCreamProps = {
 };
 
 export default function IceCream({ playerId, matchId, position }: IceCreamProps) {
-  const { sendMessage } = useWebSocket(`/ws/game/${playerId}/${matchId}`);
   const [direction, setDirection] = useState("down");
   const holdTimeout = useRef<NodeJS.Timeout | null>(null);
   const moveInterval = useRef<NodeJS.Timeout | null>(null);

@@ -13,4 +13,13 @@ export function createWebSocketConnection(path = ""): WebSocket {
     return ws;
 }
 
+// Función para enviar mensajes por WebSocket
+export function sendMessage(message: any): void {
+    if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify(message));
+    } else {
+        console.warn("WebSocket no está conectado. Intentando reconectar...");
+    }
+}
+
 export {ws}

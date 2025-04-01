@@ -23,14 +23,5 @@ export function useWebSocket(path: string) {
         };
     }, [path]);
 
-    // Función para enviar mensajes por WebSocket
-    const sendMessage = (message: any) => {
-        if (ws && ws.readyState === WebSocket.OPEN) {
-            ws.send(JSON.stringify(message));
-        } else {
-            console.warn("WebSocket no está conectado. Intentando reconectar...");
-        }
-    };
-
-    return { data, ws, sendMessage };
+    
 }
