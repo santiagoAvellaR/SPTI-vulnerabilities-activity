@@ -32,26 +32,29 @@ export default function Board({ boardData, matchId, hostId, guestId, hostIsAlive
               />
             ) : null;
           case "enemy":
-            return entity.subtype ? (
+            return entity.id ? (
               <Enemy 
-                key={JSON.stringify(entity.position)} 
-                subtype={entity.subtype} 
+                id={entity.id}
+                key={entity.id} 
+                subtype={entity.subtype ?? "troll"} 
                 position={entity.position} 
               />
             ) : null;
           case "fruit":
-            return entity.subtype ? (
+            return entity.id ? (
               <Fruit 
-                key={JSON.stringify(entity.position)} 
-                subtype={entity.subtype} 
+                id={entity.id}
+                key={entity.id} 
+                subtype={entity.subtype ?? "apple"} 
                 position={entity.position} 
               />
             ) : null;
           case "ice_block":
-            return entity.subtype ? (
-              <IceBlock 
-                key={JSON.stringify(entity.position)} 
-                subtype={entity.subtype} 
+            return entity.id ? (
+              <IceBlock
+                id={entity.id} 
+                key={entity.id} 
+                subtype={entity.subtype ?? "thin"} 
                 position={entity.position} 
               />
             ) : null;
