@@ -213,7 +213,7 @@ export default function Lobby() {
             };
 
             setIsSearching(true);
-            // navigate("/game")
+            navigate("/game")
         } else {
             setError("Failed to create WebSocket connection");
         }

@@ -3,6 +3,7 @@ import Header from "./components/header/Header";
 import Board from "./components/board/Board";
 import FruitBar from "./components/fruit-bar/FruitBar";
 import type { BoardData, Entity, Position } from "./components/board/types/types";
+import { useWebSocket } from "~/hooks/useWebSocket";
 import "./styles.css";
 
 export default function GameScreen() {
