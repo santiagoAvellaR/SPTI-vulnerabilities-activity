@@ -1,9 +1,10 @@
+import { useState } from "react";
+import {ws} from "~/services/api";
+import FruitBar from "~/components/game/footer/fruit-bar/FruitBar";
 import Header from "~/components/game/header/Header";
 import Board from "~/components/game/board/Board";
-import FruitBar from "~/components/game/footer/fruit-bar/FruitBar";
 import "./styles.css";
 
-import { useState } from "react";
 
 const GameScreen: React.FC = () => {
   // Header

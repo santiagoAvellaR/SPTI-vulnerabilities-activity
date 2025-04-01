@@ -6,6 +6,10 @@ import IceCreamSelector from "./components/IceCreamSelector";
 import GameControls from "./components/GameControls";
 import api from "~/services/api";
 import "./styles.css";
+import { Console } from "node:console";
+
+
+// TODO tipar todo
 
 const iceCreams = [
     { id: 1, name: "Vanilla", image: "/vainilla.png" },
@@ -16,13 +20,17 @@ const iceCreams = [
     { id: 6, name: "verde", image: "/verde.png" }
 ];
 
-const connectionWebSocket = (userData) => {
+const connectionWebSocket = (userData, roomCode) => {
     const matchDetails = { level: 3, map: "desert" };
     // Codificamos el objeto JSON para la URL
+    console.log("userData solo user:", userData);
+    console.log("userData conecctionwebsocket:", userData?.userId);
     const messageParam = encodeURIComponent(JSON.stringify(matchDetails));
-    const wsURI = `/ws/matchmaking?userId=${userData?.userId}&message=${messageParam}`;
+    const wssURI = `/ws/matchmaking/${roomCode}`;
+    // const wsURI = `/ws/matchmaking?userId=${userData?.userId}&message=${messageParam}`;
     try {
-        const ws = createWebSocketConnection(wsURI);
+        // const ws = createWebSocketConnection(wsURI);
+        const ws = createWebSocketConnection(wssURI);
         return ws;
     } catch (error) {
         console.error("Error creating WebSocket connection", error);
@@ -58,24 +66,24 @@ export default function Lobby() {
     const [gameStarted, setGameStarted] = useState(false);
 
     // Efecto para mostrar al segundo jugador después de 10 segundos
-    useEffect(() => {
-        // Primero mostramos la animación de "uniendo" a los 8 segundos
-        const joiningTimer = setTimeout(() => {
-            console.log("Player joining animation started");
-            setPlayerJoining(true);
-        }, 3000);
+    // useEffect(() => {
+    //     // Primero mostramos la animación de "uniendo" a los 8 segundos
+    //     const joiningTimer = setTimeout(() => {
+    //         console.log("Player joining animation started");
+    //         setPlayerJoining(true);
+    //     }, 3000);
 
-        // Luego mostramos el jugador completo a los 10 segundos
-        const showPlayerTimer = setTimeout(() => {
-            console.log("Showing second player");
-            setShowSecondPlayer(true);
-        }, 5000);
+    //     // Luego mostramos el jugador completo a los 10 segundos
+    //     const showPlayerTimer = setTimeout(() => {
+    //         console.log("Showing second player");
+    //         setShowSecondPlayer(true);
+    //     }, 5000);
 
-        return () => {
-            clearTimeout(joiningTimer);
-            clearTimeout(showPlayerTimer);
-        };
-    }, []);
+    //     return () => {
+    //         clearTimeout(joiningTimer);
+    //         clearTimeout(showPlayerTimer);
+    //     };
+    // }, []);
 
     // Cargar el código de sala cuando el componente se monte
     useEffect(() => {
@@ -190,10 +198,22 @@ export default function Lobby() {
 
     const handleFindOpponent = () => {
 
-        navigate("/game")
-        const ws = connectionWebSocket(userData);
+        const ws = connectionWebSocket(userData, roomCode);
+        console.log("WebSocket instance in findOponent:", ws);
         if (ws) {
+            ws.onopen = () => {
+                console.log("WebSocket connection opened successfully here in createlobby ");
+                setPlayerJoining(true);
+                setIsSearching(true);
+                setSearchTime(0);
+            };
+
+            ws.onmessage = (event) => {
+                console.log("Received message in createlobby:", event.data);
+            };
+
             setIsSearching(true);
+            navigate("/game")
         } else {
             setError("Failed to create WebSocket connection");
         }
