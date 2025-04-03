@@ -6,6 +6,7 @@ interface UserData {
     userId?: string;
     id?: string;
     username?: string;
+    matchId?: string;
     [key: string]: any; // For any other properties in the response
 }
 

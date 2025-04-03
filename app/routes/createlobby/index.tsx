@@ -1,4 +1,4 @@
-import { createWebSocketConnection } from "~/services/websocket";
+import { createWebSocketConnection, ws } from "~/services/websocket";
 import { useState, useEffect } from "react";
 import { useNavigate } from "@remix-run/react";
 import { useUser } from "~/userContext";
@@ -29,8 +29,8 @@ const connectionWebSocket = (userData, roomCode) => {
     // const wsURI = `/ws/matchmaking?userId=${userData?.userId}&message=${messageParam}`;
     try {
         // const ws = createWebSocketConnection(wsURI);
-        const ws = createWebSocketConnection(wssURI);
-        return ws;
+        createWebSocketConnection(wssURI);
+
     } catch (error) {
         console.error("Error creating WebSocket connection", error);
         return null;
@@ -136,7 +136,7 @@ export default function Lobby() {
         : (player1Ready && player2Ready && player1IceCream && player2IceCream); // Two players need both ready
 
 
-    
+
     // Countdown timer when players are ready
     useEffect(() => {
         console.log("isGameReady:", isGameReady);
@@ -149,6 +149,7 @@ export default function Lobby() {
                 setCountdown(prev => {
                     if (prev <= 1) {
                         clearInterval(timer);
+
                         // Marcar como iniciado y navegar
                         navigate("/game");
                         setGameStarted(true);
@@ -190,7 +191,7 @@ export default function Lobby() {
 
     const handleFindOpponent = () => {
 
-        const ws = connectionWebSocket(userData, roomCode);
+        connectionWebSocket(userData, roomCode);
         console.log("WebSocket instance in findOponent:", ws);
         if (ws) {
             ws.onopen = () => {
@@ -203,6 +204,7 @@ export default function Lobby() {
                 console.log("Received message in createlobby:", message);
                 console.log("Received JSON message two:", message.message);
                 if (message.message === 'match-found') {
+                    console.log("Match found ID one :", message.match.id);
                     console.log("Match found, navigating to game screen");
                     setPlayer1Ready(true);
                     setIsSoloPlayer(true);

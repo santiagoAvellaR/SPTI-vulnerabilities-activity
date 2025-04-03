@@ -1,7 +1,7 @@
 .sprite {
     width: 30px;
     height: 37px;
-    background-image: url("../../public/vainilla.png"); /* Asegúrate de cambiar la ruta */
+    background-image: url("/vainilla.png"); /* Asegúrate de cambiar la ruta */
     background-repeat: no-repeat;
     transform: scale(1); /* Doble de tamaño */
     transform-origin: center;
