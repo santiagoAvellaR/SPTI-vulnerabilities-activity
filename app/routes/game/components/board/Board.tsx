@@ -4,7 +4,7 @@ import Enemy from "./enemy/Enemy";
 import Fruit from "./fruit/Fruit";
 import IceBlock from "./ice-block/IceBlock";
 import "./Board.css";
-import type { BoardData } from "./types/types";
+import type { Entity, Character, BoardCell } from "./types/types";
 import { useWebSocket } from "~/hooks/useWebSocket";
 import { useUser } from "~/userContext";
 import { createWebSocketConnection, sendMessage, ws } from "~/services/websocket";
@@ -19,7 +19,7 @@ interface GameMessageInput {
 
 
 type BoardProps = {
-  boardData: BoardData;
+  boardData: BoardCell[];
   matchId: string;
   hostId: string;
   guestId: string;

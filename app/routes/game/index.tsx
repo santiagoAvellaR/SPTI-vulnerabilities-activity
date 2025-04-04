@@ -1,6 +1,6 @@
 import { useState, useEffect, lazy, Suspense } from "react";
 import LoadingScreen from "~/components/loadingScreen/LoadingScreen";
-import type { BoardData, Entity, Position } from "./components/board/types/types";
+import type { BoardCell} from "./components/board/types/types";
 import { useWebSocket } from "~/hooks/useWebSocket";
 import "./styles.css";
 
@@ -25,18 +25,21 @@ export default function GameScreen() {
       map: string;
       host: string;
       guest: string;
+      board : {
+        host: string | null;
+        guest: string | null;
+        fruitType: string;
+        fruitsType: string[];
+        enemies: number;
+        enemiesCoordinates: number[][];
+        fruitsCoordinates: number[][];
+        fruits: number;
+        playersStartCoordinates: number[][];
+        board: BoardCell[];
+      }
     };
-    fruits: string[];
-    board: {
-      size: { rows: number; cols: number };
-      entities: Array<{
-        type: string;
-        id?: string;
-        position: { x: number; y: number };
-        subtype?: string;
-      }>;
-    };
-  } | null>(null);
+    
+} | null>(null);
 
   // Mockdata para el tablero
   const data = {
@@ -268,10 +271,7 @@ export default function GameScreen() {
   const [actualFruit, setActualFruit] = useState(data.match.board.fruitType);
 
   // Estado del tablero
-  const [boardData, setBoardData] = useState<BoardData>({
-    size: { rows: 16, cols: 16 },
-    entities: []
-  });
+  const [boardData, setBoardData] = useState<BoardCell[]>([]);
   const [hostIsAlive, setHostIsAlive] = useState(true);
   const [guestIsAlive, setGuestIsAlive] = useState(true);
 
@@ -392,9 +392,9 @@ export default function GameScreen() {
         await preloadImages(gamePaths);
 
         // Establecer los datos del juego
-        setGameData(data.match.board.board);
+        setGameData(data);
         setFruits(data.match.board.fruitsType);
-        setBoardData(data.board);
+        setBoardData(data.match.board.board);
 
         // Verificar si podemos finalizar la carga
         checkLoadingCompletion();
@@ -402,8 +402,8 @@ export default function GameScreen() {
         console.error("Error al cargar recursos del juego:", error);
         // Si hay error, cargar datos básicos de todos modos
         setGameData(data);
-        setFruits(data.fruits);
-        setBoardData(data.board);
+        setFruits(data.match.board.fruitsType);
+        setBoardData(data.match.board.board);
 
         // Forzar finalización después de un tiempo
         setTimeout(() => {
