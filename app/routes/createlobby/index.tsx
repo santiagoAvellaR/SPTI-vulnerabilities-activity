@@ -25,7 +25,7 @@ const iceCreams = [
 
 export default function Lobby() {
     const navigate = useNavigate();
-    const { userData, setUserData } = useUser();
+    const { userData, setUserData, secondaryUserData, setSecondaryUserData } = useUser();
 
     const { connect } = useWebSocket();
 
@@ -128,6 +128,12 @@ export default function Lobby() {
 
     // Countdown timer when players are ready
     useEffect(() => {
+
+        setUserData({
+            ...userData,
+            imageUrl: isGameReady.image
+        });
+
         console.log("isGameReady:", isGameReady);
         // Solo iniciar el temporizador si el juego no ha comenzado ya
         if (gameStarted) return;
@@ -163,24 +169,73 @@ export default function Lobby() {
             try {
                 const message = JSON.parse(event.data);
                 console.log("Received message in createlobby:", message);
+                console.log("Message positions:", message.match.board.playersStartCoordinates);
+
+                const positions = message.match.board.playersStartCoordinates;
 
                 if (message.message === 'match-found') {
                     console.log("Match found ID:", message.match?.id);
 
                     // Guardar matchId en userData
 
+                    if (message.match.host === userData?.userId) {
+                        // Si eres el host
+                        const position = positions[0];
+                        console.log("Position for player 1 (host):", position);
 
-                    setUserData({
-                        ...userData,
-                        matchId: message.match.id
-                    });
+                        // Llenar los datos del host en userData
+                        setUserData({
+                            ...userData,
+                            matchId: message.match.id,
+                            position: position,
+                        });
 
-                    console.log("valor actualizar", {
-                        ...userData,
-                        matchId: message.match.id
+                        // Llenar los datos del guest en secondaryUserData
+                        setSecondaryUserData({
+                            userId: message.match.guest,
+                            username: message.match.guestUsername, // Si existe un campo para el nombre del guest
+                            position: positions[1],
+                        });
+
+                        console.log("Host data updated:", {
+                            ...userData,
+                            matchId: message.match.id,
+                            position: position,
+                        });
+                        console.log("Guest data updated in secondaryUserData:", {
+                            userId: message.match.guest,
+                            username: message.match.guestUsername,
+                            position: positions[1],
+                        });
+                    } else {
+                        // Si eres el guest
+                        console.log("Position for player 2 (guest):", positions);
+
+                        // Llenar los datos del guest en userData
+                        setUserData({
+                            ...userData,
+                            matchId: message.match.id,
+                            position: positions[1],
+                        });
+
+                        // Llenar los datos del host en secondaryUserData
+                        setSecondaryUserData({
+                            userId: message.match.host,
+                            username: message.match.hostUsername, // Si existe un campo para el nombre del host
+                            position: positions[0],
+                        });
+
+                        console.log("Guest data updated:", {
+                            ...userData,
+                            matchId: message.match.id,
+                            position: positions[1],
+                        });
+                        console.log("Host data updated in secondaryUserData:", {
+                            userId: message.match.host,
+                            username: message.match.hostUsername,
+                            position: positions[0],
+                        });
                     }
-                    );
-
                     console.log("userData updated with matchId:", userData);
 
                     console.log("Match found, navigating to game screen");
@@ -188,6 +243,10 @@ export default function Lobby() {
                     setIsSoloPlayer(true);
                     websocket.close(); // Close the WebSocket connection
                 }
+
+
+
+
             } catch (error) {
                 console.error("Error parsing WebSocket message:", error);
             }

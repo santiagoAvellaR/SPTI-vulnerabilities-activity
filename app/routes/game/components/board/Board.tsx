@@ -46,12 +46,12 @@ export default function Board({
   const [gridSize, setGridSize] = useState({ width: 0, height: 0 });
   const [cellSize, setCellSize] = useState(0);
   const [isBackgroundLoaded, setIsBackgroundLoaded] = useState(false);
-  const { userData } = useUser();
-  const { connect } = useWebSocket();
+  const { userData, secondaryUserData, setSecondaryUserData } = useUser();
 
   // Estado para el helado controlable
   const [playerDirection, setPlayerDirection] = useState("down");
-  const [playerPosition, setPlayerPosition] = useState({ x: 8, y: 8 }); // Posición inicial en medio del tablero
+
+  const [playerPosition, setPlayerPosition] = useState({ x: userData?.position[0], y: userData?.position[1] }); // Posición inicial en medio del tablero
   const [isMoving, setIsMoving] = useState(false);
 
   // Usamos una referencia para el estado de movimiento en lugar de un estado
@@ -130,6 +130,7 @@ export default function Board({
     };
 
     // Configurar canvas inicial
+
     createWebSocketConnection(`/ws/game/${userData?.userId}/${userData?.matchId}`);
     setupCanvas();
 
@@ -140,6 +141,41 @@ export default function Board({
       window.removeEventListener('resize', setupCanvas);
     };
   }, [backgroundImage]);
+
+
+  useEffect(() => {
+    // Configurar el manejador de mensajes del WebSocket
+    if (ws) {
+      ws.onmessage = (event) => {
+        try {
+          const message = JSON.parse(event.data);
+
+          // Verificar si el mensaje contiene datos del jugador
+          if (message.id && message.coordinates && message.direction) {
+            console.log("Received player update:", message);
+            console.log(message.coordinates, message.coordinates[1])
+
+            // Actualizar el usuario correspondiente
+            if (message.id === userData?.userId) {
+              console.log("Updating main player position:", message.coordinates);
+              // Actualizar al usuario principal
+              setPlayerPosition({ x: message.coordinates.x, y: message.coordinates.y });
+              setPlayerDirection(message.direction);
+            } else if (message.id === secondaryUserData?.userId) {
+              // Actualizar al usuario secundario
+              setSecondaryUserData({
+                ...secondaryUserData,
+                position: message.coordinates,
+                direction: message.direction,
+              });
+            }
+          }
+        } catch (error) {
+          console.error("Error parsing WebSocket message:", error);
+        }
+      };
+    }
+  }, [ws, userData?.userId, secondaryUserData, setSecondaryUserData]);
 
   // Lógica para mover el helado con el teclado
   useEffect(() => {
@@ -152,7 +188,6 @@ export default function Board({
       const directionPayload = direction as 'up' | 'down' | 'left' | 'right';
 
       console.log("Sending movement message:", directionPayload);
-      console.log("WebSocket:", ws);
 
       if (ws && ws.readyState === WebSocket.OPEN) {
         const message: GameMessageInput = {
@@ -265,7 +300,7 @@ export default function Board({
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, []); // Sin dependencias para evitar recrear el efecto
+  }, [userData?.userId, userData?.matchId]); // Sin dependencias para evitar recrear el efecto
 
   // Crear la grilla de 16x16
   const renderGrid = () => {
@@ -294,6 +329,7 @@ export default function Board({
 
     return grid;
   };
+
 
   return (
     <div className="board">
@@ -337,7 +373,7 @@ export default function Board({
             }}
           >
             <img
-              src="/vainilla.png"
+              src={userData?.imageUrl}
               alt="Player Ice Cream"
               style={{
                 width: '100%',
@@ -348,10 +384,47 @@ export default function Board({
                     playerDirection === 'down' ? '180deg' :
                       '270deg'
                   })`,
-                transition: 'transform 0.3s ease-out'
+                transition: 'transform 0.3s ease-out',
               }}
             />
           </div>
+        )}
+
+        {/* Secondary User */}
+        {cellSize > 0 && secondaryUserData?.position && (
+          <>
+            {/* {console.log(
+              "Secondary User Position:",
+              secondaryUserData.position,
+              "Calculated Left:",
+              secondaryUserData.position.x * cellSize,
+              "Calculated Top:",
+              secondaryUserData.position.y * cellSize
+            )} */}
+            <div
+              className="secondary-user"
+              style={{
+                position: 'absolute',
+                left: `${secondaryUserData.position.x * cellSize}px`,
+                top: `${secondaryUserData.position.y * cellSize}px`,
+                width: `${cellSize * 1.2}px`, // 20% más grande que una celda
+                height: `${cellSize * 1.2}px`,
+                zIndex: 9, // Por debajo del jugador principal
+                transform: 'translate(-10%, -10%)', // Centrar el sprite aumentado
+                transition: 'left 0.4s ease-out, top 0.4s ease-out', // Animación suave
+              }}
+            >
+              <img
+                src={secondaryUserData.imageUrl || "/vainilla.png"} // Imagen del secondaryUser o una predeterminada
+                alt="Secondary User"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'contain',
+                }}
+              />
+            </div>
+          </>
         )}
 
         {/* Entidades del juego posicionadas en la grilla */}
