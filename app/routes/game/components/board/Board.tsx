@@ -6,6 +6,17 @@ import IceBlock from "./ice-block/IceBlock";
 import "./Board.css";
 import type { BoardData } from "./types/types";
 import { useWebSocket } from "~/hooks/useWebSocket";
+import { useUser } from "~/userContext";
+import { createWebSocketConnection, sendMessage, ws } from "~/services/websocket";
+
+
+// TODO porner las interfaces en un archivo separado
+
+interface GameMessageInput {
+  type: 'movement' | 'exec-power' | 'rotate';
+  payload: 'up' | 'down' | 'left' | 'right';
+}
+
 
 type BoardProps = {
   boardData: BoardData;
@@ -35,6 +46,8 @@ export default function Board({
   const [gridSize, setGridSize] = useState({ width: 0, height: 0 });
   const [cellSize, setCellSize] = useState(0);
   const [isBackgroundLoaded, setIsBackgroundLoaded] = useState(false);
+  const { userData } = useUser();
+  const { connect } = useWebSocket();
 
   // Estado para el helado controlable
   const [playerDirection, setPlayerDirection] = useState("down");
@@ -117,6 +130,7 @@ export default function Board({
     };
 
     // Configurar canvas inicial
+    createWebSocketConnection(`/ws/game/${userData?.userId}/${userData?.matchId}`);
     setupCanvas();
 
     // Reconfigurarlo si cambia el tamaño de la ventana
@@ -133,6 +147,40 @@ export default function Board({
     const movePlayer = (direction: string) => {
       // Verificar si ya está en movimiento
       if (isMovingRef.current) return;
+
+
+      const directionPayload = direction as 'up' | 'down' | 'left' | 'right';
+
+      console.log("Sending movement message:", directionPayload);
+      console.log("WebSocket:", ws);
+
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        const message: GameMessageInput = {
+          type: 'movement',
+          payload: directionPayload,
+        };
+        sendMessage(message);
+      } else {
+        // WebSocket is closed or not connected
+        console.log("WebSocket is not connected or closed (readyState:", ws?.readyState, "). Reconnecting...");
+
+        // Create a new WebSocket connection
+        const newWs = createWebSocketConnection(`/ws/game/${userData?.userId}/${userData?.matchId}`);
+
+        // Use setTimeout to allow the connection to establish before sending
+        setTimeout(() => {
+          if (newWs && newWs.readyState === WebSocket.OPEN) {
+            const message: GameMessageInput = {
+              type: 'movement',
+              payload: directionPayload,
+            };
+            sendMessage(message);
+          }
+        }, 500); // Give it 500ms to connect
+      }
+
+
+      // Enviar mensaje por WebSocket
 
       // Marcar como en movimiento
       isMovingRef.current = true;
@@ -181,7 +229,7 @@ export default function Board({
       let direction = '';
       switch (event.key) {
         case "ArrowUp":
-        case "w": 
+        case "w":
         case "W":
           direction = 'up';
           break;

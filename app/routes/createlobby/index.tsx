@@ -1,14 +1,17 @@
-import { createWebSocketConnection, ws } from "~/services/websocket";
 import { useState, useEffect } from "react";
+import { useWebSocket } from "~/hooks/useWebSocket";
 import { useNavigate } from "@remix-run/react";
 import { useUser } from "~/userContext";
 import IceCreamSelector from "./components/IceCreamSelector";
 import GameControls from "./components/GameControls";
 import api from "~/services/api";
 import "./styles.css";
+import { ws } from "~/services/websocket";
 
 
 // TODO tipar todo
+
+// TODO hacer clean code
 
 const iceCreams = [
     { id: 1, name: "Vanilla", image: "/vainilla.png" },
@@ -19,27 +22,13 @@ const iceCreams = [
     { id: 6, name: "verde", image: "/verde.png" }
 ];
 
-const connectionWebSocket = (userData, roomCode) => {
-    const matchDetails = { level: 3, map: "desert" };
-    // Codificamos el objeto JSON para la URL
-    console.log("userData solo user:", userData);
-    console.log("userData conecctionwebsocket:", userData?.userId);
-    const messageParam = encodeURIComponent(JSON.stringify(matchDetails));
-    const wssURI = `/ws/matchmaking/${roomCode}`;
-    // const wsURI = `/ws/matchmaking?userId=${userData?.userId}&message=${messageParam}`;
-    try {
-        // const ws = createWebSocketConnection(wsURI);
-        createWebSocketConnection(wssURI);
-
-    } catch (error) {
-        console.error("Error creating WebSocket connection", error);
-        return null;
-    }
-}
 
 export default function Lobby() {
     const navigate = useNavigate();
-    const { userData } = useUser();
+    const { userData, setUserData } = useUser();
+
+    const { connect } = useWebSocket();
+
     const [player1IceCream, setPlayer1IceCream] = useState(null);
     const [player2IceCream, setPlayer2IceCream] = useState(null);
     const [player1Ready, setPlayer1Ready] = useState(false);
@@ -162,6 +151,59 @@ export default function Lobby() {
         return () => { clearInterval(timer); setCountdown(3) };
     }, [isGameReady, navigate, gameStarted]);
 
+
+    const setWebSocketHandlers = (websocket) => {
+        if (!websocket) return;
+
+        websocket.onopen = () => {
+            console.log("WebSocket connection opened successfully in createlobby");
+        };
+
+        websocket.onmessage = (event) => {
+            try {
+                const message = JSON.parse(event.data);
+                console.log("Received message in createlobby:", message);
+
+                if (message.message === 'match-found') {
+                    console.log("Match found ID:", message.match?.id);
+
+                    // Guardar matchId en userData
+
+
+                    setUserData({
+                        ...userData,
+                        matchId: message.match.id
+                    });
+
+                    console.log("valor actualizar", {
+                        ...userData,
+                        matchId: message.match.id
+                    }
+                    );
+
+                    console.log("userData updated with matchId:", userData);
+
+                    console.log("Match found, navigating to game screen");
+                    setPlayer1Ready(true);
+                    setIsSoloPlayer(true);
+                    websocket.close(); // Close the WebSocket connection
+                }
+            } catch (error) {
+                console.error("Error parsing WebSocket message:", error);
+            }
+        };
+
+        websocket.onerror = (error) => {
+            console.error("WebSocket error:", error);
+            setError("WebSocket connection error");
+        };
+
+        websocket.onclose = () => {
+            console.log("WebSocket connection closed");
+            setIsSearching(false);
+        };
+    };
+
     const handleStartGame = () => {
         // Evitar iniciar el juego más de una vez
         if (gameStarted) return;
@@ -190,40 +232,30 @@ export default function Lobby() {
     };
 
     const handleFindOpponent = () => {
+        try {
+            // Construir la URL para el WebSocket
+            const matchDetails = { level: 3, map: "desert" };
+            const wssURI = `/ws/matchmaking/${roomCode}`;
 
-        connectionWebSocket(userData, roomCode);
-        console.log("WebSocket instance in findOponent:", ws);
-        if (ws) {
-            ws.onopen = () => {
-                console.log("WebSocket connection opened successfully here in createlobby ");
-            };
+            console.log("Connecting to WebSocket:", wssURI);
 
-            ws.onmessage = (event) => {
+            // Usar el hook para conectar con el path específico
+            const newWs = connect(wssURI);
 
-                const message = JSON.parse(event.data);
-                console.log("Received message in createlobby:", message);
-                console.log("Received JSON message two:", message.message);
-                if (message.message === 'match-found') {
-                    console.log("Match found ID one :", message.match.id);
-                    console.log("Match found, navigating to game screen");
-                    setPlayer1Ready(true);
-                    setIsSoloPlayer(true);
-                    console.log("Player 1 :", player1IceCream);
-                    // navigate("/game")
-                }
+            if (newWs) {
+                console.log("WebSocket connected successfully");
 
-                // const message = JSON.parse(event.data);
-                // console.log("Message type:", message.type);
-                // console.log("Received message event.data :", event.data);
+                // Configuración del manejo de mensajes
+                setWebSocketHandlers(newWs);
 
-
-            };
-
-            setIsSearching(true);
-        } else {
-            setError("Failed to create WebSocket connection");
+                setIsSearching(true);
+            } else {
+                setError("Failed to create WebSocket connection");
+            }
+        } catch (error) {
+            console.error("Error in handleFindOpponent:", error);
+            setError(`Error connecting to WebSocket: ${error.message}`);
         }
-
     };
 
     const cancelMatchmaking = () => {

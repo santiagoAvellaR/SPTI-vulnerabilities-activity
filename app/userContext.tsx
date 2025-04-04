@@ -1,33 +1,31 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
-
-
 interface UserData {
     userId?: string;
     id?: string;
     username?: string;
     matchId?: string;
-    [key: string]: any; // For any other properties in the response
+    [key: string]: any; // Para cualquier otra propiedad en la respuesta
 }
 
-// Define the context type
+// Define el tipo del contexto
 interface UserContextType {
     userData: UserData | null;
     setUserData: (data: UserData | string | null) => void;
     isLoggedIn: boolean;
 }
 
-// Create the context with default values
+// Crea el contexto con valores predeterminados
 const UserContext = createContext<UserContextType>({
     userData: null,
     setUserData: () => { },
     isLoggedIn: false
 });
 
-// Custom hook to use the user context
+// Hook personalizado para usar el contexto de usuario
 export const useUser = () => useContext(UserContext);
 
-// Provider component that will wrap your app
+// Componente proveedor que envolverá tu aplicación
 export function UserProvider({ children }: { children: ReactNode }) {
     // Intentar cargar datos del usuario desde localStorage al inicializar
     const [userData, setUserDataState] = useState<UserData | null>(() => {
@@ -46,12 +44,14 @@ export function UserProvider({ children }: { children: ReactNode }) {
         let newUserData: UserData | null = null;
 
         if (typeof data === 'string') {
-            newUserData = { userId: data };
+            // Si es un string, lo tratamos como userId (comportamiento original)
+            newUserData = { ...userData, userId: data };
             console.log("Creating UserData from string:", newUserData);
         }
         else if (data && typeof data === 'object') {
-            newUserData = data;
-            console.log("Using object as UserData:", newUserData);
+            // Si es un objeto, actualizamos solo las propiedades proporcionadas
+            newUserData = { ...userData, ...data };
+            console.log("Merging with existing UserData:", newUserData);
         }
         else {
             console.log("Clearing UserData");
@@ -73,7 +73,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         setUserDataState(newUserData);
     };
 
-    // Compute whether user is logged in
+    // Calcular si el usuario ha iniciado sesión
     const isLoggedIn = Boolean(userData && (userData.userId || userData.id));
 
     // Efecto para registrar cambios en userData (para depuración)
