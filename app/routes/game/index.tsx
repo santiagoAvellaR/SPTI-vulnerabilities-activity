@@ -42,36 +42,216 @@ export default function GameScreen() {
   const data = {
     "message": "match-found",
     "match": {
-      "id": "bc371685",
-      "level": 3,
-      "map": "desert",
-      "host": "5e1b6281-8762-44d0-adbb-5a3981c6f00d",
-      "guest": "5e1b6281-8762-44d0-adbb-5a3981c6f00d"
-    },
-    "fruits": ["banana", "grape", "watermelon", "orange"],
-    "board": {
-      "size": { "rows": 16, "cols": 16 },
-      "entities": [
-        // { "id": "host", "type": "player", "position": { "x": 9, "y": 1 } },
-        // { "id": "guest", "type": "player", "position": { "x": 9, "y": 14 } },
-
-        //{ "id": "enemy-001", "type": "enemy", "subtype": "troll", "position": { "x": 2, "y": 4 } },
-        //{ "id": "enemy-002", "type": "enemy", "subtype": "goblin", "position": { "x": 2, "y": 12 } },
-        //{ "id": "enemy-003", "type": "enemy", "subtype": "slime", "position": { "x": 14, "y": 4 } },
-        //{ "id": "enemy-004", "type": "enemy", "subtype": "dragon", "position": { "x": 14, "y": 12 } },
-
-        { "id": "fruit-001", "type": "fruit", "subtype": "banana", "position": { "x": 4, "y": 5 } },
-        { "id": "fruit-002", "type": "fruit", "subtype": "banana", "position": { "x": 4, "y": 6 } },
-        { "id": "fruit-003", "type": "fruit", "subtype": "banana", "position": { "x": 4, "y": 7 } },
-        { "id": "fruit-004", "type": "fruit", "subtype": "banana", "position": { "x": 4, "y": 8 } }
-
-        // { "id": "ice-001", "type": "ice_block", "subtype": "solid", "position": { "x": 5, "y": 5 } },
-        // { "id": "ice-002", "type": "ice_block", "subtype": "breakable", "position": { "x": 5, "y": 6 } },
-        // { "id": "ice-003", "type": "ice_block", "subtype": "thin", "position": { "x": 5, "y": 7 } },
-        // { "id": "ice-004", "type": "ice_block", "subtype": "solid", "position": { "x": 6, "y": 5 } },
-        // { "id": "ice-005", "type": "ice_block", "subtype": "breakable", "position": { "x": 6, "y": 6 } },
-        // { "id": "ice-006", "type": "ice_block", "subtype": "thin", "position": { "x": 6, "y": 7 } }
-      ]
+      "id": "fc93742b",
+      "level": 1,
+      "map": "match-1",
+      "host": "88b26ba7-ae82-4765-a080-157429683d92",
+      "guest": "d1ba4175-97d6-4b76-b065-c6af7e3255fb",
+      "board": {
+        "host": null,
+        "guest": null,
+        "fruitType": "banana",
+        "fruitsType": [
+          "banana",
+          "grape"
+        ],
+        "enemies": 4,
+        "enemiesCoordinates": [
+          [2, 4],
+          [2, 12],
+          [14, 4],
+          [14, 12]
+        ],
+        "fruitsCoordinates": [
+          [4, 5],
+          [4, 6],
+          [4, 7],
+          [4, 8],
+          [4, 9],
+          [4, 10],
+          [4, 11],
+          [11, 5],
+          [11, 6],
+          [11, 7],
+          [11, 8],
+          [11, 9],
+          [11, 10],
+          [11, 11]
+        ],
+        "fruits": 14,
+        "playersStartCoordinates": [
+          [9, 1],
+          [9, 14]
+        ],
+        "board": [
+          {
+            "x": 2,
+            "y": 4,
+            "item": null,
+            "character": {
+              "type": "troll",
+              "orientation": "down",
+              "id": "4b375c1c-8986-4a67-837e-926300bbac2d"
+            }
+          },
+          {
+            "x": 2,
+            "y": 12,
+            "item": null,
+            "character": {
+              "type": "troll",
+              "orientation": "down",
+              "id": "b8b5f880-7fa6-4220-9b70-b1a245f57827"
+            }
+          },
+          {
+            "x": 4,
+            "y": 5,
+            "item": {
+              "type": "fruit",
+              "id": "e004d80a-b167-4ae9-b38e-a1573fc65090"
+            },
+            "character": null
+          },
+          {
+            "x": 4,
+            "y": 6,
+            "item": {
+              "type": "fruit",
+              "id": "7cfe0de1-c709-42ed-a7d7-fa2673825d44"
+            },
+            "character": null
+          },
+          {
+            "x": 4,
+            "y": 7,
+            "item": {
+              "type": "fruit",
+              "id": "eb112536-8a3b-4d3a-8528-1d723d7d42e7"
+            },
+            "character": null
+          },
+          {
+            "x": 4,
+            "y": 8,
+            "item": {
+              "type": "fruit",
+              "id": "34e2d577-bfcb-4b1b-a4c0-f1c958848675"
+            },
+            "character": null
+          },
+          {
+            "x": 4,
+            "y": 9,
+            "item": {
+              "type": "fruit",
+              "id": "54119a06-6641-40f1-9f4b-5a1363e90266"
+            },
+            "character": null
+          },
+          {
+            "x": 4,
+            "y": 10,
+            "item": {
+              "type": "fruit",
+              "id": "c9cc5627-5d01-4839-a895-0f05e1f3763a"
+            },
+            "character": null
+          },
+          {
+            "x": 4,
+            "y": 11,
+            "item": {
+              "type": "fruit",
+              "id": "0f5f476e-f669-4fba-8376-4597d6cf4c2b"
+            },
+            "character": null
+          },
+          {
+            "x": 11,
+            "y": 5,
+            "item": {
+              "type": "fruit",
+              "id": "1711073b-d527-437a-b633-c1405ceb0adf"
+            },
+            "character": null
+          },
+          {
+            "x": 11,
+            "y": 6,
+            "item": {
+              "type": "fruit",
+              "id": "c528a7f2-f680-4a4e-94ed-9638505f8918"
+            },
+            "character": null
+          },
+          {
+            "x": 11,
+            "y": 7,
+            "item": {
+              "type": "fruit",
+              "id": "13cc9945-d413-443a-bb60-3565e383a080"
+            },
+            "character": null
+          },
+          {
+            "x": 11,
+            "y": 8,
+            "item": {
+              "type": "fruit",
+              "id": "720157b4-2ae0-457b-ae7a-0a8fbe4fb5e5"
+            },
+            "character": null
+          },
+          {
+            "x": 11,
+            "y": 9,
+            "item": {
+              "type": "fruit",
+              "id": "dafb770f-c69a-4cac-8dc9-0e1e0e0435c8"
+            },
+            "character": null
+          },
+          {
+            "x": 11,
+            "y": 10,
+            "item": {
+              "type": "fruit",
+              "id": "d81b7db0-436f-4534-aef3-9fcad67655cf"
+            },
+            "character": null
+          },
+          {
+            "x": 11,
+            "y": 11,
+            "item": {
+              "type": "fruit",
+              "id": "f77b5cbb-1bea-4038-8247-96ea0b53969c"
+            },
+            "character": null
+          },
+          {
+            "x": 14,
+            "y": 4,
+            "item": null,
+            "character": {
+              "type": "troll",
+              "orientation": "down",
+              "id": "ae64e9ca-9074-4362-90be-282b85ba97ac"
+            }
+          },
+          {
+            "x": 14,
+            "y": 12,
+            "item": null,
+            "character": {
+              "type": "troll",
+              "orientation": "down",
+              "id": "e53d4570-c3ab-4a82-b4f3-55aafaedfcee"
+            }
+          }
+        ]
+      }
     }
   };
   // Header States
@@ -85,7 +265,7 @@ export default function GameScreen() {
 
   // FruitBar States
   const [fruits, setFruits] = useState<string[]>([]);
-  const [actualFruit, setActualFruit] = useState(data.fruits[0]);
+  const [actualFruit, setActualFruit] = useState(data.match.board.fruitType);
 
   // Estado del tablero
   const [boardData, setBoardData] = useState<BoardData>({
@@ -212,8 +392,8 @@ export default function GameScreen() {
         await preloadImages(gamePaths);
 
         // Establecer los datos del juego
-        setGameData(data);
-        setFruits(data.fruits);
+        setGameData(data.match.board.board);
+        setFruits(data.match.board.fruitsType);
         setBoardData(data.board);
 
         // Verificar si podemos finalizar la carga
@@ -257,7 +437,7 @@ export default function GameScreen() {
     return (
       <LoadingScreen
         message={loadingMessage}
-        boardData={data}
+        boardData={data.match.board.board}
         componentProgress={componentProgress}
         progress={assetProgress}
       />
@@ -285,7 +465,7 @@ export default function GameScreen() {
           setSoundEffectsOn={setSoundEffectsOn}
         />
         <Board
-          boardData={data.board}
+          boardData={data.match.board.board}
           matchId={data.match.id}
           hostId={data.match.host}
           guestId={data.match.guest}
@@ -295,7 +475,7 @@ export default function GameScreen() {
           setGuestIsAlive={setGuestIsAlive}
         />
         <FruitBar
-          fruits={data.fruits}
+          fruits={data.match.board.fruitsType}
           selectedFruit={actualFruit}
           setSelectedFruit={setActualFruit}
         />
