@@ -18,7 +18,6 @@ interface GameMessageInput {
   payload: 'up' | 'down' | 'left' | 'right';
 }
 
-
 type BoardProps = {
   boardData: BoardCell[];
   matchId: string;
@@ -74,10 +73,6 @@ export default function Board({
     setIceBlocks(boardData.filter(cell => cell.item?.type === 'block'));
     setIceCreams(boardData.filter(cell => cell.character?.type === 'iceCream'));
   }, [boardData]);
-
-  
-
-
 
   // Inicializar y configurar el canvas
   useEffect(() => {
@@ -401,70 +396,17 @@ export default function Board({
       const style = getElementsStyles(iceCream.x, iceCream.y, cellSize);
       return (
         <div key={iceCream.character.id} style={style}>
-          <IceCream playerInformation={iceCream} playerColor={actualFruit}/>
+          <IceCream 
+            playerInformation={iceCream} 
+            playerColor={actualFruit}
+            hostIsAlive={hostIsAlive} setHostIsAlive={setHostIsAlive} 
+            guestIsAlive={guestIsAlive} setGuestIsAlive={setGuestIsAlive}
+            hostId={hostId} guestId={guestId} matchId={matchId}
+            />
         </div>
       );
     });
   };
-
-  const renderEntities = () => {
-    return boardData.flatMap((cell) => {
-      const style = {
-        position: 'absolute' as const,
-        left: `${cell.x * cellSize}px`,
-        top: `${cell.y * cellSize}px`,
-        width: `${cellSize}px`,
-        height: `${cellSize}px`,
-      };
-  
-      if (item) {
-        switch (item.type) {
-          case "iceBlock":
-            renderedEntities.push(
-              <IceBlock key={`${item.id}`} id={item.id} x={x} y={y} style={style}/>
-            );
-            break;
-          case "fruit":
-            renderedEntities.push(
-              <Fruit key={`${item.id}`} id={item.id} subtype={item.type} x={x} y={y} />
-            );
-            break;
-        }
-      }
-  
-      if (character) {
-        switch (character.type) {
-          case "enemy":
-            renderedEntities.push(
-              <Troll
-                key={`enemy-${character.id}`}
-                id={character.id}
-                subtype={character.type}
-                x={x}
-                y={y}
-                orientation={character.orientation}
-              />
-            );
-            break;
-          case "iceCream":
-            renderedEntities.push(
-              <IceCream
-                key={`icecream-${character.id}`}
-                playerId={character.id}
-                matchId={matchId}
-                x={x}
-                y={y}
-                orientation={character.orientation}
-              />
-            );
-            break;
-        }
-      }
-  
-      return renderedEntities;
-    });
-  };
-
 
   return (
     <div className="board">
@@ -563,7 +505,10 @@ export default function Board({
         )}
 
         {/* Entidades del juego posicionadas en la grilla */}
-        {cellSize > 0 && renderEntities()}
+        {cellSize > 0 && renderEnemies()}
+        {cellSize > 0 && renderIceBlocks()}
+        {cellSize > 0 && renderFruits()}
+        {cellSize > 0 && renderIceCreams()}
         
       </div>
     </div>

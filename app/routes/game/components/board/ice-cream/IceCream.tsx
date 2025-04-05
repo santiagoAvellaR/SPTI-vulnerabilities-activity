@@ -6,9 +6,20 @@ import type { BoardCell } from "../types/types";
 type IceCreamProps = {
   playerInformation: BoardCell
   playerColor: string;
+  hostIsAlive: boolean;
+  setHostIsAlive: (isAlive: boolean) => void;
+  guestIsAlive: boolean;
+  setGuestIsAlive: (isAlive: boolean) => void;
+  hostId: string;
+  guestId: string;
+  matchId: string;
 };
 
-export default function IceCream({ playerInformation, playerColor }: IceCreamProps) {
+export default function IceCream({ 
+    playerInformation, playerColor, 
+    hostIsAlive, setHostIsAlive, 
+    guestIsAlive, setGuestIsAlive, 
+    hostId, guestId, matchId}: IceCreamProps) {
   const [direction, setDirection] = useState("down");
   const [xPosition, setxPosition] = useState(playerInformation.x);
   const [yPosition, setyPosition] = useState(playerInformation.y);  const holdTimeout = useRef<NodeJS.Timeout | null>(null);
