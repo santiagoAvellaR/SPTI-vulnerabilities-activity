@@ -5,13 +5,15 @@ import "./IceCream.css";
 type IceCreamProps = {
   playerId: string;
   matchId: string;
-  position: { x: number; y: number };
+  x: number; 
+  y: number;
+  orientation: string;
 };
 
-export default function IceCream({ playerId, matchId, position }: IceCreamProps) {
+export default function IceCream({ playerId, matchId, x, y }: IceCreamProps) {
   const [direction, setDirection] = useState("down");
-  const [playerPosition, setPlayerPosition] = useState(position); // Nueva posición reactiva
-  const holdTimeout = useRef<NodeJS.Timeout | null>(null);
+  const [xPosition, setxPosition] = useState(x);
+  const [yPosition, setyPosition] = useState(y);  const holdTimeout = useRef<NodeJS.Timeout | null>(null);
   const moveInterval = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -20,8 +22,8 @@ export default function IceCream({ playerId, matchId, position }: IceCreamProps)
       try {
         const data = JSON.parse(event.data);
         if (data.message === "element move" && data.id === playerId) {
-          setPlayerPosition({ x: data.xPosition, y: data.yPosition });
-        }
+          setxPosition(data.xPosition);
+          setyPosition(data.yPosition);        }
       } catch (error) {
         console.error("Error parsing WebSocket message:", error);
       }
@@ -98,7 +100,7 @@ export default function IceCream({ playerId, matchId, position }: IceCreamProps)
   }, [direction]);
 
   return (
-    <div className="IceCream" style={{ left: `${playerPosition.x * 40}px`, top: `${playerPosition.y * 40}px` }}>
+    <div className="IceCream" style={{ left: `${x * 40}px`, top: `${y * 40}px` }}>
       <img src={`/assets/player-${playerId}.webp`} alt={`Player ${playerId}`} />
     </div>
   );

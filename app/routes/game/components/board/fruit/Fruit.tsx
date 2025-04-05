@@ -5,18 +5,20 @@ import "./Fruit.css";
 type FruitProps = {
   id: string;
   subtype: string;
-  position: { x: number; y: number };
+  x: number; 
+  y: number;
 };
 
-export default function Fruit({ id, subtype, position }: FruitProps) {
-  const [fruitPosition, setFruitPosition] = useState(position);
+export default function Fruit({ id, subtype, x, y }: FruitProps) {
+  const [xPosition, setxPosition] = useState(x);
+  const [yPosition, setyPosition] = useState(y);
 
   return (
     <div
       className="fruit"
       style={{
-        left: `${fruitPosition.x}px`,
-        top: `${fruitPosition.y}px`,
+        left: `${x}px`,
+        top: `${y}px`,
         height: "50px",
         width: "50px",
       }}

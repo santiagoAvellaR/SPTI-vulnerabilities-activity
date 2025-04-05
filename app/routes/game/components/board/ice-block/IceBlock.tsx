@@ -4,19 +4,21 @@ import "./IceBlock.css";
 
 type IceBlockProps = {
   id: string;
-  subtype: string;
-  position: { x: number; y: number };
+  x: number; 
+  y: number;
 };
 
-export default function IceBlock({ id, subtype, position }: IceBlockProps) {
-  const [blockPosition, setBlockPosition] = useState(position);
+export default function IceBlock({ id, x, y }: IceBlockProps) {
+  const [xPosition, setxPosition] = useState(x);
+  const [yPosition, setyPosition] = useState(y);
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       try {
         const data = JSON.parse(event.data);
         if (data.message === "element move" && data.id === id) {
-          setBlockPosition({ x: data.xPosition, y: data.yPosition });
+          setxPosition(data.xPosition);
+          setyPosition(data.yPosition);
         }
       } catch (error) {
         console.error("Error parsing WebSocket message:", error);
@@ -38,11 +40,11 @@ export default function IceBlock({ id, subtype, position }: IceBlockProps) {
     <div
       className="ice-block"
       style={{
-        left: `${blockPosition.x * 40}px`,
-        top: `${blockPosition.y * 40}px`,
+        left: `${x * 40}px`,
+        top: `${y * 40}px`,
       }}
     >
-      <img src={`/assets/iceblock-${subtype}.webp`} alt={`Ice Block ${subtype}`} />
+      <img src={"/assets/iceblock-.webp"} alt={"Ice Block"} />
     </div>
   );
 }

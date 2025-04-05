@@ -1,21 +1,25 @@
 import { useState, useEffect } from "react";
 import { ws } from "~/services/websocket";
 
-type EnemyProps = {
+type TrollProps = {
   id: string;
   subtype: string;
-  position: { x: number; y: number };
+  x: number; 
+  y: number;
+  orientation: string;
 };
 
-export default function Enemy({ id, subtype, position }: EnemyProps) {
-  const [enemyPosition, setEnemyPosition] = useState(position);
+export default function Troll({ id, subtype, x, y, orientation }: TrollProps) {
+  const [xPosition, setxPosition] = useState(x);
+  const [yPosition, setyPosition] = useState(y);
 
   useEffect(() => {
     const messageListener = (event: MessageEvent) => {
       try {
         const data = JSON.parse(event.data);
         if (data.message === "element move" && data.id === id) {
-          setEnemyPosition({ x: data.xPosition, y: data.yPosition });
+          setxPosition(data.xPosition);
+          setyPosition(data.yPosition);
         }
       } catch (error) {
         console.error("Error parsing WebSocket message:", error);
@@ -34,8 +38,8 @@ export default function Enemy({ id, subtype, position }: EnemyProps) {
   }, [id]);
 
   return (
-    <div className="enemy" style={{ left: `${enemyPosition.x * 40}px`, top: `${enemyPosition.y * 40}px` }}>
-      <img src={`/assets/enemy-${subtype}.webp`} alt={`Enemy ${subtype}`} />
+    <div className="troll" style={{ left: `${x * 40}px`, top: `${y * 40}px` }}>
+      <img src={"/assets/enemy-troll.webp"} alt={"Troll Enemy"} />
     </div>
   );
 }

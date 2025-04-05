@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import IceCream from "./ice-cream/IceCream";
-import Enemy from "./enemy/Enemy";
+import Enemy from "./enemy/Troll";
 import Fruit from "./fruit/Fruit";
 import IceBlock from "./ice-block/IceBlock";
 import "./Board.css";
@@ -8,6 +8,7 @@ import type { Entity, Character, BoardCell } from "./types/types";
 import { useWebSocket } from "~/hooks/useWebSocket";
 import { useUser } from "~/userContext";
 import { createWebSocketConnection, sendMessage, ws } from "~/services/websocket";
+import Troll from "./enemy/Troll";
 
 
 // TODO porner las interfaces en un archivo separado
@@ -330,6 +331,66 @@ export default function Board({
     return grid;
   };
 
+  const renderEntities = () => {
+    return boardData.flatMap((cell) => {
+      const { x, y, item, character } = cell;
+      const renderedEntities = [];
+      const style = {
+        position: 'absolute' as const,
+        left: `${cell.x * cellSize}px`,
+        top: `${cell.y * cellSize}px`,
+        width: `${cellSize}px`,
+        height: `${cellSize}px`,
+      };
+  
+      if (item) {
+        switch (item.type) {
+          case "iceBlock":
+            renderedEntities.push(
+              <IceBlock key={`${item.id}`} id={item.id} x={x} y={y} />
+            );
+            break;
+          case "fruit":
+            renderedEntities.push(
+              <Fruit key={`${item.id}`} id={item.id} subtype={item.type} x={x} y={y} />
+            );
+            break;
+        }
+      }
+  
+      if (character) {
+        switch (character.type) {
+          case "enemy":
+            renderedEntities.push(
+              <Troll
+                key={`enemy-${character.id}`}
+                id={character.id}
+                subtype={character.type}
+                x={x}
+                y={y}
+                orientation={character.orientation}
+              />
+            );
+            break;
+          case "iceCream":
+            renderedEntities.push(
+              <IceCream
+                key={`icecream-${character.id}`}
+                playerId={character.id}
+                matchId={matchId}
+                x={x}
+                y={y}
+                orientation={character.orientation}
+              />
+            );
+            break;
+        }
+      }
+  
+      return renderedEntities;
+    });
+  };
+
 
   return (
     <div className="board">
@@ -428,60 +489,7 @@ export default function Board({
         )}
 
         {/* Entidades del juego posicionadas en la grilla */}
-        {boardData.entities.map((entity) => {
-          const style = {
-            position: 'absolute' as 'absolute',
-            left: `${entity.position.x * cellSize}px`,
-            top: `${entity.position.y * cellSize}px`,
-            width: `${cellSize}px`,
-            height: `${cellSize}px`,
-          };
-
-          switch (entity.type) {
-            case "player":
-              return entity.id ? (
-                <div key={entity.id} style={style}>
-                  <IceCream
-                    playerId={entity.id === "host" ? hostId : guestId}
-                    matchId={matchId}
-                    position={entity.position}
-                  />
-                </div>
-              ) : null;
-            case "enemy":
-              return entity.id ? (
-                <div key={entity.id} style={style}>
-                  <Enemy
-                    id={entity.id}
-                    subtype={entity.subtype ?? "troll"}
-                    position={entity.position}
-                  />
-                </div>
-              ) : null;
-            case "fruit":
-              return entity.id ? (
-                <div key={entity.id} style={style}>
-                  <Fruit
-                    id={entity.id}
-                    subtype={entity.subtype ?? "apple"}
-                    position={entity.position}
-                  />
-                </div>
-              ) : null;
-            case "ice_block":
-              return entity.id ? (
-                <div key={entity.id} style={style}>
-                  <IceBlock
-                    id={entity.id}
-                    subtype={entity.subtype ?? "thin"}
-                    position={entity.position}
-                  />
-                </div>
-              ) : null;
-            default:
-              return null;
-          }
-        })}
+        {cellSize > 0 && renderEntities()}
       </div>
     </div>
   );
