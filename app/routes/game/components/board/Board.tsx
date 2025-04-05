@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import IceCream from "./ice-cream/IceCream";
 import Enemy from "./enemy/Troll";
 import Fruit from "./fruit/Fruit";
@@ -407,6 +407,71 @@ export default function Board({
       );
     });
   };
+
+  // FUNCIONES DE FRUTAS
+  // --- Elimina una fruit dado su id
+  const removeFruit = useCallback((id: string) => {
+    setFruits(prev => prev.filter(cell => cell.item?.id !== id));
+  }, []);
+
+  const addFruit = (newFruitCell: BoardCell) => {
+    setFruits(prevFruits => {
+      // Verifica si ya existe una fruta en esa posición para evitar duplicados
+      const exists = prevFruits.some(
+        fruit => fruit.x === newFruitCell.x && fruit.y === newFruitCell.y
+      );
+      if (!exists) {
+        return [...prevFruits, newFruitCell];
+      }
+      return prevFruits;
+    });
+  };
+  
+  // FUNCIONES DE BLOQUES
+  // --- Elimina un bloque de hielo dado su id
+  const removeBlock = useCallback((id: string) => {
+    setIceBlocks(prev => prev.filter(cell => cell.item?.id !== id));
+  }, []);
+
+  // FUNCIONES DE ENEMIGOS
+  // --- Actualiza un enemigo dado su id
+  const updateEnemy = useCallback((id: string, newX: number, newY: number, newDirection: Direction) => {
+    setEnemies(prev =>
+      prev.map(cell =>
+        cell.character?.id === id
+          ? {
+              ...cell,
+              x: newX,
+              y: newY,
+              character: {
+                ...cell.character!,
+                direction: newDirection
+              }
+            }
+          : cell
+      )
+    );
+  }, []);
+
+// Actualiza un helado dado su id
+const updateIceCream = useCallback((id: string, newX: number, newY: number, newDirection: Direction) => {
+  setIceCreams(prev =>
+    prev.map(cell =>
+      cell.character?.id === id
+        ? {
+            ...cell,
+            x: newX,
+            y: newY,
+            character: {
+              ...cell.character!,
+              direction: newDirection
+            }
+          }
+        : cell
+    )
+  );
+}, []);
+
 
   return (
     <div className="board">
