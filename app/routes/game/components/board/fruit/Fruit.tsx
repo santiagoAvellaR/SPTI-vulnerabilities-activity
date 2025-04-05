@@ -1,45 +1,20 @@
 import { useEffect, useState } from "react";
 import { ws } from "~/services/websocket";
 import "./Fruit.css";
+import type { BoardCell } from "../types/types";
 
 type FruitProps = {
-  id: string;
+  fruitInformation: BoardCell;
   subtype: string;
-  position: { x: number; y: number };
 };
 
-export default function Fruit({ id, subtype, position }: FruitProps) {
-  const [fruitPosition, setFruitPosition] = useState(position);
-
-  useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-      try {
-        const data = JSON.parse(event.data);
-        if (data.message === "element move" && data.id === id) {
-          setFruitPosition({ x: data.xPosition, y: data.yPosition });
-        }
-      } catch (error) {
-        console.error("Error parsing WebSocket message:", error);
-      }
-    };
-
-    if (ws) {
-      ws.addEventListener("message", handleMessage);
-    }
-
-    return () => {
-      if (ws) {
-        ws.removeEventListener("message", handleMessage);
-      }
-    };
-  }, [id]);
-
+export default function Fruit({ fruitInformation, subtype }: FruitProps) {
   return (
     <div
       className="fruit"
       style={{
-        left: `${fruitPosition.x * 35}px`,
-        top: `${fruitPosition.y * 35}px`,
+        left: `${fruitInformation.x}px`,
+        top: `${fruitInformation.y}px`,
         height: "50px",
         width: "50px",
       }}

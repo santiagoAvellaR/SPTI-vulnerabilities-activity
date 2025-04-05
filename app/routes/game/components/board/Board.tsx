@@ -1,13 +1,13 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import IceCream from "./ice-cream/IceCream";
-import Enemy from "./enemy/Enemy";
 import Fruit from "./fruit/Fruit";
+import Troll from "./enemy/Troll";
 import IceBlock from "./ice-block/IceBlock";
 import "./Board.css";
-import type { BoardData } from "./types/types";
-import { useWebSocket } from "~/hooks/useWebSocket";
+import type { Character, BoardCell, Item } from "./types/types";
 import { useUser } from "~/userContext";
 import { createWebSocketConnection, sendMessage, ws } from "~/services/websocket";
+
 
 
 // TODO porner las interfaces en un archivo separado
@@ -17,9 +17,8 @@ interface GameMessageInput {
   payload: 'up' | 'down' | 'left' | 'right' | string;
 }
 
-
 type BoardProps = {
-  boardData: BoardData;
+  boardData: BoardCell[];
   matchId: string;
   hostId: string;
   guestId: string;
@@ -28,6 +27,9 @@ type BoardProps = {
   guestIsAlive: boolean;
   setGuestIsAlive: (isAlive: boolean) => void;
   backgroundImage?: string;
+  actualFruit: string;
+  setActualFruit: (fruit: string) => void;
+  setFruitsCounter: (count: number) => void;
 };
 
 export default function Board({
@@ -39,7 +41,8 @@ export default function Board({
   setHostIsAlive,
   guestIsAlive,
   setGuestIsAlive,
-  backgroundImage = "/fondo mapa.png"
+  backgroundImage = "/fondo mapa.png",
+  actualFruit
 }: BoardProps) {
   // Referencia al canvas
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -57,6 +60,20 @@ export default function Board({
   // Usamos una referencia para el estado de movimiento en lugar de un estado
   // Esto evita problemas de sincronización con los event listeners
   const isMovingRef = useRef(false);
+
+  // informacion del tablero
+  const [fruits, setFruits] = useState<BoardCell[]>([]);
+  const [iceBlocks, setIceBlocks] = useState<BoardCell[]>([]);
+  const [enemies, setEnemies] = useState<BoardCell[]>([]);
+  const [iceCreams, setIceCreams] = useState<BoardCell[]>([]);
+
+  // Cargar información del tablero desde el WebSocket
+  useEffect(() => {
+    setFruits(boardData.filter(cell => cell.item?.type === 'fruit'));
+    setEnemies(boardData.filter(cell => cell.character?.type === 'troll'));
+    setIceBlocks(boardData.filter(cell => cell.item?.type === 'block'));
+    setIceCreams(boardData.filter(cell => cell.character?.type === 'iceCream'));
+  }, [boardData]);
 
   // Inicializar y configurar el canvas
   useEffect(() => {
@@ -168,6 +185,11 @@ export default function Board({
                 position: message.coordinates,
                 direction: message.direction,
               });
+            }
+            if (message.idItemConsumed) {
+              // Eliminar la fruta consumida
+              console.log("Removing fruit with ID:", message.idItemConsumed);
+              removeFruit(message.idItemConsumed);
             }
           }
         } catch (error) {
@@ -330,6 +352,154 @@ export default function Board({
     return grid;
   };
 
+  const getElementsStyles = (x: number, y: number, size: number) => ({
+    position: 'absolute' as const,
+    left: `${x * size}px`,
+    top: `${y * size}px`,
+    width: `${size}px`,
+    height: `${size}px`,
+  });
+
+  const renderFruits = () => {
+    return fruits.map((fruit) => {
+      if (!fruit.item) return null; // Asegúrate de que el item exista
+      const style = getElementsStyles(fruit.x, fruit.y, cellSize);
+      return (
+        <div key={fruit.item.id} style={style}>
+          <Fruit fruitInformation={fruit} subtype={actualFruit} />
+        </div>
+      );
+    });
+  };
+
+  const renderIceBlocks = () => {
+    return iceBlocks.map((block) => {
+      if (!block.item) return null; // Asegúrate de que el item exista
+      const style = getElementsStyles(block.x, block.y, cellSize);
+      return (
+        <div key={block.item.id} style={style}>
+          <IceBlock blockInformation={block} />
+        </div>
+      );
+    });
+  };
+
+  const renderEnemies = () => {
+    return enemies.map((enemy) => {
+      if (!enemy.character) return null; // Asegúrate de que el item exista
+      const style = getElementsStyles(enemy.x, enemy.y, cellSize);
+      return (
+        <div key={enemy.character.id} style={style}>
+          <Troll trollInformation={enemy} />
+        </div>
+      );
+    });
+  };
+
+  const renderIceCreams = () => {
+    return iceCreams.map((iceCream) => {
+      if (!iceCream.character) return null; // Asegúrate de que el item exista
+      const style = getElementsStyles(iceCream.x, iceCream.y, cellSize);
+      return (
+        <div key={iceCream.character.id} style={style}>
+          <IceCream
+            playerInformation={iceCream}
+            playerColor={actualFruit}
+            hostIsAlive={hostIsAlive} setHostIsAlive={setHostIsAlive}
+            guestIsAlive={guestIsAlive} setGuestIsAlive={setGuestIsAlive}
+            hostId={hostId} guestId={guestId} matchId={matchId}
+          />
+        </div>
+      );
+    });
+  };
+
+  // FUNCIONES DE FRUTAS
+  // --- Elimina una fruit dado su id
+  const removeFruit = useCallback((id: string) => {
+    console.log("Removing fruit with ID:", id);
+
+    // Eliminar la fruta del estado actual
+    setFruits((prev) => prev.filter((cell) => cell.item?.id !== id));
+
+    // Volver a cargar el mock
+    setFruits(boardData.filter((cell) => cell.item?.type === "fruit"));
+    setEnemies(boardData.filter((cell) => cell.character?.type === "troll"));
+    setIceBlocks(boardData.filter((cell) => cell.item?.type === "block"));
+    setIceCreams(boardData.filter((cell) => cell.character?.type === "iceCream"));
+  }, [boardData]);
+  // --- Añade una fruta
+  const addFruit = (newFruitCell: BoardCell) => {
+    setFruits(prevFruits => {
+      // Verifica si ya existe una fruta en esa posición para evitar duplicados
+      const exists = prevFruits.some(
+        fruit => fruit.item?.id === newFruitCell.item?.id
+      );
+      if (!exists) {
+        return [...prevFruits, newFruitCell];
+      }
+      return prevFruits;
+    });
+  };
+
+  // FUNCIONES DE BLOQUES
+  // --- Elimina un bloque de hielo dado su id
+  const removeBlock = useCallback((id: string) => {
+    setIceBlocks(prev => prev.filter(cell => cell.item?.id !== id));
+  }, []);
+  const addIceBlock = (newIceBlock: BoardCell) => {
+    setIceBlocks(prevIceBlock => {
+      // Verifica si ya existe una fruta en esa posición para evitar duplicados
+      const exists = prevIceBlock.some(
+        iceBlock => iceBlock.item?.id === newIceBlock.item?.id
+      );
+      if (!exists) {
+        return [...prevIceBlock, newIceBlock];
+      }
+      return prevIceBlock;
+    });
+  };
+
+  // FUNCIONES DE ENEMIGOS
+  // --- Actualiza un enemigo dado su id
+  const updateEnemy = useCallback((id: string, newX: number, newY: number, newDirection: Direction) => {
+    setEnemies(prev =>
+      prev.map(cell =>
+        cell.character?.id === id
+          ? {
+            ...cell,
+            x: newX,
+            y: newY,
+            character: {
+              ...cell.character!,
+              direction: newDirection
+            }
+          }
+          : cell
+      )
+    );
+  }, []);
+
+  // FUNCIONES DE HELADOS
+  // --- Actualiza un helado dado su id
+  const updateIceCream = useCallback((id: string, newX: number, newY: number, newDirection: Direction) => {
+    setIceCreams(prev =>
+      prev.map(cell =>
+        cell.character?.id === id
+          ? {
+            ...cell,
+            x: newX,
+            y: newY,
+            character: {
+              ...cell.character!,
+              direction: newDirection
+            }
+          }
+          : cell
+      )
+    );
+  }, []);
+
 
   return (
     <div className="board">
@@ -425,60 +595,11 @@ export default function Board({
         )}
 
         {/* Entidades del juego posicionadas en la grilla */}
-        {boardData.entities.map((entity) => {
-          const style = {
-            position: 'absolute' as 'absolute',
-            left: `${entity.position.x * cellSize}px`,
-            top: `${entity.position.y * cellSize}px`,
-            width: `${cellSize}px`,
-            height: `${cellSize}px`,
-          };
+        {cellSize > 0 && renderEnemies()}
+        {cellSize > 0 && renderIceBlocks()}
+        {cellSize > 0 && renderFruits()}
+        {cellSize > 0 && renderIceCreams()}
 
-          switch (entity.type) {
-            case "player":
-              return entity.id ? (
-                <div key={entity.id} style={style}>
-                  <IceCream
-                    playerId={entity.id === "host" ? hostId : guestId}
-                    matchId={matchId}
-                    position={entity.position}
-                  />
-                </div>
-              ) : null;
-            case "enemy":
-              return entity.id ? (
-                <div key={entity.id} style={style}>
-                  <Enemy
-                    id={entity.id}
-                    subtype={entity.subtype ?? "troll"}
-                    position={entity.position}
-                  />
-                </div>
-              ) : null;
-            case "fruit":
-              return entity.id ? (
-                <div key={entity.id} style={style}>
-                  <Fruit
-                    id={entity.id}
-                    subtype={entity.subtype ?? "apple"}
-                    position={entity.position}
-                  />
-                </div>
-              ) : null;
-            case "ice_block":
-              return entity.id ? (
-                <div key={entity.id} style={style}>
-                  <IceBlock
-                    id={entity.id}
-                    subtype={entity.subtype ?? "thin"}
-                    position={entity.position}
-                  />
-                </div>
-              ) : null;
-            default:
-              return null;
-          }
-        })}
       </div>
     </div>
   );
