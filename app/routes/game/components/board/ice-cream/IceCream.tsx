@@ -20,9 +20,10 @@ export default function IceCream({
     hostIsAlive, setHostIsAlive, 
     guestIsAlive, setGuestIsAlive, 
     hostId, guestId, matchId}: IceCreamProps) {
-  const [direction, setDirection] = useState("down");
+  const [direction, setDirection] = useState(playerInformation.character?.orientation);
   const [xPosition, setxPosition] = useState(playerInformation.x);
-  const [yPosition, setyPosition] = useState(playerInformation.y);  const holdTimeout = useRef<NodeJS.Timeout | null>(null);
+  const [yPosition, setyPosition] = useState(playerInformation.y);  
+  const holdTimeout = useRef<NodeJS.Timeout | null>(null);
   const moveInterval = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -109,7 +110,7 @@ export default function IceCream({
   }, [direction]);
 
   return (
-    <div className="IceCream" style={{ left: `${playerInformation.x * 40}px`, top: `${y * 40}px` }}>
+    <div className="IceCream" style={{ left: `${playerInformation.x * 40}px`, top: `${playerInformation.y * 40}px` }}>
       <img src={`/assets/player-${playerInformation.character?.id}.webp`} alt={`Player ${playerInformation.character?.id}`} />
     </div>
   );

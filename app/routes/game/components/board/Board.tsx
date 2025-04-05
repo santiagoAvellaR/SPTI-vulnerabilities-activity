@@ -413,12 +413,12 @@ export default function Board({
   const removeFruit = useCallback((id: string) => {
     setFruits(prev => prev.filter(cell => cell.item?.id !== id));
   }, []);
-
+  // --- Añade una fruta
   const addFruit = (newFruitCell: BoardCell) => {
     setFruits(prevFruits => {
       // Verifica si ya existe una fruta en esa posición para evitar duplicados
       const exists = prevFruits.some(
-        fruit => fruit.x === newFruitCell.x && fruit.y === newFruitCell.y
+        fruit => fruit.item?.id === newFruitCell.item?.id
       );
       if (!exists) {
         return [...prevFruits, newFruitCell];
@@ -432,6 +432,18 @@ export default function Board({
   const removeBlock = useCallback((id: string) => {
     setIceBlocks(prev => prev.filter(cell => cell.item?.id !== id));
   }, []);
+  const addIceBlock = (newIceBlock: BoardCell) => {
+    setIceBlocks(prevIceBlock => {
+      // Verifica si ya existe una fruta en esa posición para evitar duplicados
+      const exists = prevIceBlock.some(
+        iceBlock => iceBlock.item?.id === newIceBlock.item?.id
+      );
+      if (!exists) {
+        return [...prevIceBlock, newIceBlock];
+      }
+      return prevIceBlock;
+    });
+  };
 
   // FUNCIONES DE ENEMIGOS
   // --- Actualiza un enemigo dado su id
@@ -453,24 +465,25 @@ export default function Board({
     );
   }, []);
 
-// Actualiza un helado dado su id
-const updateIceCream = useCallback((id: string, newX: number, newY: number, newDirection: Direction) => {
-  setIceCreams(prev =>
-    prev.map(cell =>
-      cell.character?.id === id
-        ? {
-            ...cell,
-            x: newX,
-            y: newY,
-            character: {
-              ...cell.character!,
-              direction: newDirection
+  // FUNCIONES DE HELADOS
+  // --- Actualiza un helado dado su id
+  const updateIceCream = useCallback((id: string, newX: number, newY: number, newDirection: Direction) => {
+    setIceCreams(prev =>
+      prev.map(cell =>
+        cell.character?.id === id
+          ? {
+              ...cell,
+              x: newX,
+              y: newY,
+              character: {
+                ...cell.character!,
+                direction: newDirection
+              }
             }
-          }
-        : cell
-    )
-  );
-}, []);
+          : cell
+      )
+    );
+  }, []);
 
 
   return (
