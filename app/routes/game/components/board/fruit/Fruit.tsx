@@ -44,7 +44,7 @@ export default function Fruit({ id, subtype, position }: FruitProps) {
         width: "50px",
       }}
     >
-      <img src={`/public/fruits/${subtype}.webp`} alt={`Fruit ${subtype}`} />
+      <img src={`/fruits/${subtype}.webp`} alt={`Fruit ${subtype}`} />
     </div>
   );
 }

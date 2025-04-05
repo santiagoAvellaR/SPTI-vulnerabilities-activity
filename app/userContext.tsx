@@ -1,90 +1,115 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
-
-
 interface UserData {
     userId?: string;
     id?: string;
     username?: string;
-    [key: string]: any; // For any other properties in the response
+    matchId?: string;
+    position?: { x: number; y: number };
+    direction?: string;
+    imageUrl?: string;
+    state?: string;
+    [key: string]: any; // Para cualquier otra propiedad en la respuesta
 }
 
-// Define the context type
+// Define el tipo del contexto
 interface UserContextType {
     userData: UserData | null;
+    secondaryUserData: UserData | null; // Nuevo estado para el segundo usuario
     setUserData: (data: UserData | string | null) => void;
+    setSecondaryUserData: (data: UserData | string | null) => void; // Nueva función para el segundo usuario
     isLoggedIn: boolean;
 }
 
-// Create the context with default values
+// Crea el contexto con valores predeterminados
 const UserContext = createContext<UserContextType>({
     userData: null,
+    secondaryUserData: null,
     setUserData: () => { },
+    setSecondaryUserData: () => { },
     isLoggedIn: false
 });
 
-// Custom hook to use the user context
+// Hook personalizado para usar el contexto de usuario
 export const useUser = () => useContext(UserContext);
 
-// Provider component that will wrap your app
+// Componente proveedor que envolverá tu aplicación
 export function UserProvider({ children }: { children: ReactNode }) {
-    // Intentar cargar datos del usuario desde localStorage al inicializar
+    // Estado para el primer usuario
     const [userData, setUserDataState] = useState<UserData | null>(() => {
         if (typeof window !== 'undefined') {
             const saved = localStorage.getItem('userData');
-            console.log("Initial userData from localStorage:", saved);
             return saved ? JSON.parse(saved) : null;
         }
         return null;
     });
 
-    // Función mejorada para manejar diferentes tipos de entrada
-    const setUserData = (data: UserData | string | null) => {
-        console.log("setUserData called with:", data);
+    // Estado para el segundo usuario
+    const [secondaryUserData, setSecondaryUserDataState] = useState<UserData | null>(() => {
+        if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem('secondaryUserData');
+            return saved ? JSON.parse(saved) : null;
+        }
+        return null;
+    });
 
+    // Función para actualizar el primer usuario
+    const setUserData = (data: UserData | string | null) => {
         let newUserData: UserData | null = null;
 
         if (typeof data === 'string') {
-            newUserData = { userId: data };
-            console.log("Creating UserData from string:", newUserData);
-        }
-        else if (data && typeof data === 'object') {
-            newUserData = data;
-            console.log("Using object as UserData:", newUserData);
-        }
-        else {
-            console.log("Clearing UserData");
+            newUserData = { ...userData, userId: data };
+        } else if (data && typeof data === 'object') {
+            newUserData = { ...userData, ...data };
         }
 
-        // Guardar en localStorage antes de actualizar el estado
         if (typeof window !== 'undefined') {
             if (newUserData) {
-                console.log("Saving to localStorage:", JSON.stringify(newUserData));
                 localStorage.setItem('userData', JSON.stringify(newUserData));
             } else {
-                console.log("Removing from localStorage");
                 localStorage.removeItem('userData');
             }
         }
 
-        // Actualizar el estado con la nueva información
-        console.log("Updating state with:", newUserData);
         setUserDataState(newUserData);
     };
 
-    // Compute whether user is logged in
+    // Función para actualizar el segundo usuario
+    const setSecondaryUserData = (data: UserData | string | null) => {
+        let newSecondaryUserData: UserData | null = null;
+
+        if (typeof data === 'string') {
+            newSecondaryUserData = { ...secondaryUserData, userId: data };
+        } else if (data && typeof data === 'object') {
+            newSecondaryUserData = { ...secondaryUserData, ...data };
+        }
+
+        if (typeof window !== 'undefined') {
+            if (newSecondaryUserData) {
+                localStorage.setItem('secondaryUserData', JSON.stringify(newSecondaryUserData));
+            } else {
+                localStorage.removeItem('secondaryUserData');
+            }
+        }
+
+        setSecondaryUserDataState(newSecondaryUserData);
+    };
+
+    // Calcular si el usuario principal ha iniciado sesión
     const isLoggedIn = Boolean(userData && (userData.userId || userData.id));
 
-    // Efecto para registrar cambios en userData (para depuración)
+    // Efecto para registrar cambios en los datos de usuario
     useEffect(() => {
         console.log("UserContext - userData changed:", userData);
-        console.log("UserContext - isLoggedIn:", isLoggedIn);
-    }, [userData, isLoggedIn]);
+        console.log("UserContext - secondaryUserData changed:", secondaryUserData);
+    }, [userData, secondaryUserData]);
 
     // Valor del contexto construido con los datos actuales
     const contextValue = {
         userData,
+        secondaryUserData,
         setUserData,
+        setSecondaryUserData,
         isLoggedIn
     };
 
