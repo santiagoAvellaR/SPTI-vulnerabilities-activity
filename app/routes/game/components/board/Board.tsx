@@ -4,7 +4,7 @@ import Enemy from "./enemy/Troll";
 import Fruit from "./fruit/Fruit";
 import IceBlock from "./ice-block/IceBlock";
 import "./Board.css";
-import type { Entity, Character, BoardCell } from "./types/types";
+import type {Character, BoardCell, Item } from "./types/types";
 import { useWebSocket } from "~/hooks/useWebSocket";
 import { useUser } from "~/userContext";
 import { createWebSocketConnection, sendMessage, ws } from "~/services/websocket";
@@ -29,6 +29,7 @@ type BoardProps = {
   guestIsAlive: boolean;
   setGuestIsAlive: (isAlive: boolean) => void;
   backgroundImage?: string;
+  actualFruit: string;
 };
 
 export default function Board({
@@ -40,7 +41,8 @@ export default function Board({
   setHostIsAlive,
   guestIsAlive,
   setGuestIsAlive,
-  backgroundImage = "/fondo mapa.png"
+  backgroundImage = "/fondo mapa.png",
+  actualFruit
 }: BoardProps) {
   // Referencia al canvas
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -58,6 +60,24 @@ export default function Board({
   // Usamos una referencia para el estado de movimiento en lugar de un estado
   // Esto evita problemas de sincronización con los event listeners
   const isMovingRef = useRef(false);
+
+  // informacion del tablero
+  const [fruits, setFruits] = useState<BoardCell[]>([]);
+  const [iceBlocks, setIceBlocks] = useState<BoardCell[]>([]);
+  const [enemies, setEnemies] = useState<BoardCell[]>([]);
+  const [iceCreams, setIceCreams] = useState<BoardCell[]>([]);
+
+  // Cargar información del tablero desde el WebSocket
+  useEffect(() => {
+    setFruits(boardData.filter(cell => cell.item?.type === 'fruit'));
+    setEnemies(boardData.filter(cell => cell.character?.type === 'enemy'));
+    setIceBlocks(boardData.filter(cell => cell.item?.type === 'block'));
+    setIceCreams(boardData.filter(cell => cell.character?.type === 'iceCream'));
+  }, [boardData]);
+
+  
+
+
 
   // Inicializar y configurar el canvas
   useEffect(() => {
@@ -331,10 +351,64 @@ export default function Board({
     return grid;
   };
 
+  const getElementsStyles = (x: number, y: number, size: number) => ({
+    position: 'absolute' as const,
+    left: `${x * size}px`,
+    top: `${y * size}px`,
+    width: `${size}px`,
+    height: `${size}px`,
+  });
+
+  const renderFruits = () => {
+    return fruits.map((fruit) => {
+      if (!fruit.item) return null; // Asegúrate de que el item exista
+      const style = getElementsStyles(fruit.x, fruit.y, cellSize);
+      return (
+        <div key={fruit.item.id} style={style}>
+          <Fruit fruitInformation={fruit} subtype={actualFruit}/>
+        </div>
+      );
+    });
+  };
+
+  const renderIceBlocks = () => {
+    return iceBlocks.map((block) => {
+      if (!block.item) return null; // Asegúrate de que el item exista
+      const style = getElementsStyles(block.x, block.y, cellSize);
+      return (
+        <div key={block.item.id} style={style}>
+          <IceBlock blockInformation={block}/>
+        </div>
+      );
+    });
+  };
+
+  const renderEnemies = () => {
+    return enemies.map((enemy) => {
+      if (!enemy.character) return null; // Asegúrate de que el item exista
+      const style = getElementsStyles(enemy.x, enemy.y, cellSize);
+      return (
+        <div key={enemy.character.id} style={style}>
+          <Enemy trollInformation={enemy}/>
+        </div>
+      );
+    });
+  };
+
+  const renderIceCreams = () => {
+    return iceCreams.map((iceCream) => {
+      if (!iceCream.character) return null; // Asegúrate de que el item exista
+      const style = getElementsStyles(iceCream.x, iceCream.y, cellSize);
+      return (
+        <div key={iceCream.character.id} style={style}>
+          <IceCream playerInformation={iceCream} playerColor={actualFruit}/>
+        </div>
+      );
+    });
+  };
+
   const renderEntities = () => {
     return boardData.flatMap((cell) => {
-      const { x, y, item, character } = cell;
-      const renderedEntities = [];
       const style = {
         position: 'absolute' as const,
         left: `${cell.x * cellSize}px`,
@@ -347,7 +421,7 @@ export default function Board({
         switch (item.type) {
           case "iceBlock":
             renderedEntities.push(
-              <IceBlock key={`${item.id}`} id={item.id} x={x} y={y} />
+              <IceBlock key={`${item.id}`} id={item.id} x={x} y={y} style={style}/>
             );
             break;
           case "fruit":
@@ -490,6 +564,7 @@ export default function Board({
 
         {/* Entidades del juego posicionadas en la grilla */}
         {cellSize > 0 && renderEntities()}
+        
       </div>
     </div>
   );

@@ -1,24 +1,20 @@
 import { useEffect, useState } from "react";
 import { ws } from "~/services/websocket";
 import "./Fruit.css";
+import type { BoardCell } from "../types/types";
 
 type FruitProps = {
-  id: string;
+  fruitInformation: BoardCell;
   subtype: string;
-  x: number; 
-  y: number;
 };
 
-export default function Fruit({ id, subtype, x, y }: FruitProps) {
-  const [xPosition, setxPosition] = useState(x);
-  const [yPosition, setyPosition] = useState(y);
-
+export default function Fruit({ fruitInformation, subtype }: FruitProps) {
   return (
     <div
       className="fruit"
       style={{
-        left: `${x}px`,
-        top: `${y}px`,
+        left: `${fruitInformation.x}px`,
+        top: `${fruitInformation.y}px`,
         height: "50px",
         width: "50px",
       }}

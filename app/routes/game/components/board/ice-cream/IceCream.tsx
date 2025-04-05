@@ -1,19 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import { ws, sendMessage } from "~/services/websocket";
 import "./IceCream.css";
+import type { BoardCell } from "../types/types";
 
 type IceCreamProps = {
-  playerId: string;
-  matchId: string;
-  x: number; 
-  y: number;
-  orientation: string;
+  playerInformation: BoardCell
+  playerColor: string;
 };
 
-export default function IceCream({ playerId, matchId, x, y }: IceCreamProps) {
+export default function IceCream({ playerInformation, playerColor }: IceCreamProps) {
   const [direction, setDirection] = useState("down");
-  const [xPosition, setxPosition] = useState(x);
-  const [yPosition, setyPosition] = useState(y);  const holdTimeout = useRef<NodeJS.Timeout | null>(null);
+  const [xPosition, setxPosition] = useState(playerInformation.x);
+  const [yPosition, setyPosition] = useState(playerInformation.y);  const holdTimeout = useRef<NodeJS.Timeout | null>(null);
   const moveInterval = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -21,7 +19,7 @@ export default function IceCream({ playerId, matchId, x, y }: IceCreamProps) {
     const handleMessage = (event: MessageEvent) => {
       try {
         const data = JSON.parse(event.data);
-        if (data.message === "element move" && data.id === playerId) {
+        if (data.message === "element move" && data.id === playerInformation.character?.id) {
           setxPosition(data.xPosition);
           setyPosition(data.yPosition);        }
       } catch (error) {
@@ -38,7 +36,7 @@ export default function IceCream({ playerId, matchId, x, y }: IceCreamProps) {
         ws.removeEventListener("message", handleMessage);
       }
     };
-  }, [playerId]);
+  }, [playerInformation]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -100,8 +98,8 @@ export default function IceCream({ playerId, matchId, x, y }: IceCreamProps) {
   }, [direction]);
 
   return (
-    <div className="IceCream" style={{ left: `${x * 40}px`, top: `${y * 40}px` }}>
-      <img src={`/assets/player-${playerId}.webp`} alt={`Player ${playerId}`} />
+    <div className="IceCream" style={{ left: `${playerInformation.x * 40}px`, top: `${y * 40}px` }}>
+      <img src={`/assets/player-${playerInformation.character?.id}.webp`} alt={`Player ${playerInformation.character?.id}`} />
     </div>
   );
 }

@@ -1,15 +1,3 @@
-export type Position = {
-    x: number;
-    y: number;
-};
-
-export type Entity = {
-    type: string;
-    subtype?: string;
-    id?: string;
-    position: Position;
-};
-
 export type Character = {
     type: string; // Tipo del personaje (por ejemplo: "troll")
     orientation: string; // Orientación del personaje (por ejemplo: "down")
