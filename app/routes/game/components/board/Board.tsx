@@ -1,14 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import IceCream from "./ice-cream/IceCream";
-import Enemy from "./enemy/Troll";
 import Fruit from "./fruit/Fruit";
+import Troll from "./enemy/Troll";
 import IceBlock from "./ice-block/IceBlock";
 import "./Board.css";
 import type {Character, BoardCell, Item } from "./types/types";
 import { useWebSocket } from "~/hooks/useWebSocket";
 import { useUser } from "~/userContext";
 import { createWebSocketConnection, sendMessage, ws } from "~/services/websocket";
-import Troll from "./enemy/Troll";
+
 
 
 // TODO porner las interfaces en un archivo separado
@@ -386,7 +386,7 @@ export default function Board({
       const style = getElementsStyles(enemy.x, enemy.y, cellSize);
       return (
         <div key={enemy.character.id} style={style}>
-          <Enemy trollInformation={enemy}/>
+          <Troll trollInformation={enemy}/>
         </div>
       );
     });
