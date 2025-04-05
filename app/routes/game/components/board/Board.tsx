@@ -14,8 +14,8 @@ import Troll from "./enemy/Troll";
 // TODO porner las interfaces en un archivo separado
 
 interface GameMessageInput {
-  type: 'movement' | 'exec-power' | 'rotate';
-  payload: 'up' | 'down' | 'left' | 'right';
+  type: 'movement' | 'exec-power' | 'rotate' | 'set-color';
+  payload: 'up' | 'down' | 'left' | 'right' | string;
 }
 
 type BoardProps = {
@@ -131,7 +131,7 @@ export default function Board({
           );
 
           // Aplicar un overlay para dar efecto de profundidad
-          ctx.fillStyle = 'rgba(0, 10, 30, 0.3)'; // Azul muy oscuro semi-transparente
+          ctx.fillStyle = 'rgba(0, 10, 30, 0.0)'; // Azul muy oscuro semi-transparente
           ctx.fillRect(0, 0, size, size);
 
           setIsBackgroundLoaded(true);
@@ -335,7 +335,7 @@ export default function Board({
               top: `${row * cellSize}px`,
               width: `${cellSize}px`,
               height: `${cellSize}px`,
-              border: '1px solid rgba(255, 255, 255, 0.1)',
+              border: '1px solid rgba(255, 255, 255, 0.0)',
               boxSizing: 'border-box',
             }}
           />
@@ -518,8 +518,8 @@ export default function Board({
             className={`player-ice-cream ${playerDirection} ${isMoving ? 'moving' : ''}`}
             style={{
               position: 'absolute',
-              left: `${playerPosition.x * cellSize}px`,
-              top: `${playerPosition.y * cellSize}px`,
+              left: `${playerPosition.y * cellSize}px`,
+              top: `${playerPosition.x * cellSize}px`,
               width: `${cellSize * 1.2}px`, // 20% más grande que una celda
               height: `${cellSize * 1.2}px`,
               zIndex: 10, // Por encima de otras entidades
@@ -534,11 +534,7 @@ export default function Board({
                 width: '100%',
                 height: '100%',
                 objectFit: 'contain',
-                transform: `rotate(${playerDirection === 'up' ? '0deg' :
-                  playerDirection === 'right' ? '90deg' :
-                    playerDirection === 'down' ? '180deg' :
-                      '270deg'
-                  })`,
+                transform: 'none',
                 transition: 'transform 0.3s ease-out',
               }}
             />
@@ -560,8 +556,8 @@ export default function Board({
               className="secondary-user"
               style={{
                 position: 'absolute',
-                left: `${secondaryUserData.position.x * cellSize}px`,
-                top: `${secondaryUserData.position.y * cellSize}px`,
+                left: `${secondaryUserData.position.y * cellSize}px`,
+                top: `${secondaryUserData.position.x * cellSize}px`,
                 width: `${cellSize * 1.2}px`, // 20% más grande que una celda
                 height: `${cellSize * 1.2}px`,
                 zIndex: 9, // Por debajo del jugador principal
@@ -576,6 +572,7 @@ export default function Board({
                   width: '100%',
                   height: '100%',
                   objectFit: 'contain',
+                  transform: 'none',
                 }}
               />
             </div>
