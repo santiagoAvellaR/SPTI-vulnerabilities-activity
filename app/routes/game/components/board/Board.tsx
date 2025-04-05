@@ -5,7 +5,6 @@ import Troll from "./enemy/Troll";
 import IceBlock from "./ice-block/IceBlock";
 import "./Board.css";
 import type {Character, BoardCell, Item } from "./types/types";
-import { useWebSocket } from "~/hooks/useWebSocket";
 import { useUser } from "~/userContext";
 import { createWebSocketConnection, sendMessage, ws } from "~/services/websocket";
 
@@ -71,7 +70,7 @@ export default function Board({
   // Cargar información del tablero desde el WebSocket
   useEffect(() => {
     setFruits(boardData.filter(cell => cell.item?.type === 'fruit'));
-    setEnemies(boardData.filter(cell => cell.character?.type === 'enemy'));
+    setEnemies(boardData.filter(cell => cell.character?.type === 'troll'));
     setIceBlocks(boardData.filter(cell => cell.item?.type === 'block'));
     setIceCreams(boardData.filter(cell => cell.character?.type === 'iceCream'));
   }, [boardData]);
@@ -186,6 +185,10 @@ export default function Board({
                 position: message.coordinates,
                 direction: message.direction,
               });
+            }
+            if (message.idItemConsumed) {
+              // Eliminar la fruta consumida
+              removeFruit(message.idItemConsumed);
             }
           }
         } catch (error) {

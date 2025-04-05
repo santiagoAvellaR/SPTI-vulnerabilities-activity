@@ -6,7 +6,7 @@ export default function Troll({trollInformation}: {trollInformation: BoardCell})
 
   return (
     <div className="troll" style={{ left: `${trollInformation.x * 40}px`, top: `${trollInformation.y * 40}px` }}>
-      <img src={"/assets/enemy-troll.webp"} alt={"Troll Enemy"} />
+      <img src={"/game-screen/board/enemy/troll/Trolls_moving_up.webp"} alt={"Troll Enemy"} />
     </div>
   );
 }
