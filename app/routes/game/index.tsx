@@ -1,7 +1,6 @@
 import { useState, useEffect, lazy, Suspense } from "react";
 import LoadingScreen from "~/components/loadingScreen/LoadingScreen";
 import type { BoardCell} from "./components/board/types/types";
-import { useWebSocket } from "~/hooks/useWebSocket";
 import "./styles.css";
 
 const Header = lazy(() => import("./components/header/Header"));
@@ -259,8 +258,7 @@ export default function GameScreen() {
   };
   // Header States
   const [isRunning, setIsRunning] = useState(true);
-  const [scorePlayer1, setScorePlayer1] = useState(0);
-  const [scorePlayer2, setScorePlayer2] = useState(0);
+  const [fruitsCounter, setFruitsCounter] = useState(0);
   const [minutes, setMinutes] = useState(1);
   const [seconds, setSeconds] = useState(30);
   const [musicOn, setMusicOn] = useState(true);
@@ -451,14 +449,9 @@ export default function GameScreen() {
         <Header
           isRunning={isRunning}
           setIsRunning={setIsRunning}
-          player1Score={scorePlayer1}
-          setPlayer1Score={setScorePlayer1}
-          player2Score={scorePlayer2}
-          setPlayer2Score={setScorePlayer2}
+          fruitsCounter={fruitsCounter}
           minutes={minutes}
-          setMinutes={setMinutes}
           seconds={seconds}
-          setSeconds={setSeconds}
           musicOn={musicOn}
           setMusicOn={setMusicOn}
           soundEffectsOn={soundEffectsOn}
@@ -473,6 +466,9 @@ export default function GameScreen() {
           setHostIsAlive={setHostIsAlive}
           guestIsAlive={guestIsAlive}
           setGuestIsAlive={setGuestIsAlive}
+          actualFruit={actualFruit}
+          setActualFruit={setActualFruit}
+          setFruitsCounter={setFruitsCounter}
         />
         <FruitBar
           fruits={data.match.board.fruitsType}

@@ -29,6 +29,8 @@ type BoardProps = {
   setGuestIsAlive: (isAlive: boolean) => void;
   backgroundImage?: string;
   actualFruit: string;
+  setActualFruit: (fruit: string) => void;
+  setFruitsCounter: (count: number) => void;
 };
 
 export default function Board({
