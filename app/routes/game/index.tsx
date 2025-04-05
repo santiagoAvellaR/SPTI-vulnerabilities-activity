@@ -1,6 +1,6 @@
 import { useState, useEffect, lazy, Suspense } from "react";
 import LoadingScreen from "~/components/loadingScreen/LoadingScreen";
-import type { BoardCell} from "./components/board/types/types";
+import type { BoardCell } from "./components/board/types/types";
 import "./styles.css";
 import { useUser } from "~/userContext";
 import { createWebSocketConnection, sendMessage, ws } from "~/services/websocket";
@@ -13,30 +13,30 @@ export default function GameScreen() {
   // Informacion del jugador
   const { userData, secondaryUserData, setSecondaryUserData } = useUser();
 
-  useEffect(() => {
-    // Conectar al WebSocket al cargar la pantalla del juego
-    console.log("Conectando al WebSocket para recibir info del mapa...", ws);
-    createWebSocketConnection(`/ws/game/${userData?.userId}/${userData?.matchId}`);
-    console.log("Conectado al WebSocket para recibir info del mapa:", ws);
+  // useEffect(() => {
+  //   // Conectar al WebSocket al cargar la pantalla del juego
+  //   console.log("Conectando al WebSocket para recibir info del mapa...", ws);
+  //   createWebSocketConnection(`/ws/game/${userData?.userId}/${userData?.matchId}`);
+  //   console.log("Conectado al WebSocket para recibir info del mapa:", ws);
 
-    if (ws) {
-      ws.onmessage = (event) => {
-        try {
-          const messageRecieved = JSON.parse(event.data);
-          console.log("Esperando info de mapa... Mensaje recibido del WebSocket:", messageRecieved);
+  //   if (ws) {
+  //     ws.onmessage = (event) => {
+  //       try {
+  //         const messageRecieved = JSON.parse(event.data);
+  //         console.log("Esperando info de mapa... Mensaje recibido del WebSocket:", messageRecieved);
 
-          // Verificar si el mensaje contiene datos del 
-          if (messageRecieved.match && messageRecieved.message === "match-found") {
-            console.log("Datos del juego recibidos:", messageRecieved.match);
-            setGameData(messageRecieved);
-            setActualFruit(messageRecieved.match.board.fruitType)
-          }
-        } catch (error) {
-          console.error("Error parsing WebSocket message:", error);
-        }
-      };
-    }
-  }, [userData?.userId, userData?.matchId]);
+  //         // Verificar si el mensaje contiene datos del 
+  //         if (messageRecieved.match && messageRecieved.message === "match-found") {
+  //           console.log("Datos del juego recibidos:", messageRecieved.match);
+  //           setGameData(messageRecieved);
+  //           setActualFruit(messageRecieved.match.board.fruitType)
+  //         }
+  //       } catch (error) {
+  //         console.error("Error parsing WebSocket message:", error);
+  //       }
+  //     };
+  //   }
+  // }, [userData?.userId, userData?.matchId]);
   // Estados de carga
   const [componentsLoaded, setComponentsLoaded] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -53,7 +53,7 @@ export default function GameScreen() {
       map: string;
       host: string;
       guest: string;
-      board : {
+      board: {
         host: string | null;
         guest: string | null;
         fruitType: string;
@@ -66,235 +66,225 @@ export default function GameScreen() {
         board: BoardCell[];
       }
     };
-    
-} | null>(null);
+
+  } | null>(null);
 
   // Mockdata para el tablero
-  // setGameData ({
-  //   "message": "match-found",
-  //   "match": {
-  //     "id": "fc93742b",
-  //     "level": 1,
-  //     "map": "match-1",
-  //     "host": "88b26ba7-ae82-4765-a080-157429683d92",
-  //     "guest": "d1ba4175-97d6-4b76-b065-c6af7e3255fb",
-  //     "board": {
-  //       "host": null,
-  //       "guest": null,
-  //       "fruitType": "banana",
-  //       "fruitsType": [
-  //         "banana",
-  //         "grape"
-  //       ],
-  //       "enemies": 4,
-  //       "enemiesCoordinates": [
-  //         [2, 4],
-  //         [2, 12],
-  //         [14, 4],
-  //         [14, 12]
-  //       ],
-  //       "fruitsCoordinates": [
-  //         [4, 5],
-  //         [4, 6],
-  //         [4, 7],
-  //         [4, 8],
-  //         [4, 9],
-  //         [4, 10],
-  //         [4, 11],
-  //         [11, 5],
-  //         [11, 6],
-  //         [11, 7],
-  //         [11, 8],
-  //         [11, 9],
-  //         [11, 10],
-  //         [11, 11]
-  //       ],
-  //       "fruits": 14,
-  //       "playersStartCoordinates": [
-  //         [9, 1],
-  //         [9, 14]
-  //       ],
-  //       "board": [
-  //         {
-  //           "x": 2,
-  //           "y": 4,
-  //           "item": null,
-  //           "character": {
-  //             "type": "troll",
-  //             "orientation": "down",
-  //             "id": "4b375c1c-8986-4a67-837e-926300bbac2d"
-  //           }
-  //         },
-  //         {
-  //           "x": 2,
-  //           "y": 12,
-  //           "item": null,
-  //           "character": {
-  //             "type": "troll",
-  //             "orientation": "down",
-  //             "id": "b8b5f880-7fa6-4220-9b70-b1a245f57827"
-  //           }
-  //         },
-  //         {
-  //           "x": 4,
-  //           "y": 5,
-  //           "item": {
-  //             "type": "fruit",
-  //             "id": "e004d80a-b167-4ae9-b38e-a1573fc65090"
-  //           },
-  //           "character": null
-  //         },
-  //         {
-  //           "x": 4,
-  //           "y": 6,
-  //           "item": {
-  //             "type": "fruit",
-  //             "id": "7cfe0de1-c709-42ed-a7d7-fa2673825d44"
-  //           },
-  //           "character": null
-  //         },
-  //         {
-  //           "x": 4,
-  //           "y": 7,
-  //           "item": {
-  //             "type": "fruit",
-  //             "id": "eb112536-8a3b-4d3a-8528-1d723d7d42e7"
-  //           },
-  //           "character": null
-  //         },
-  //         {
-  //           "x": 4,
-  //           "y": 8,
-  //           "item": {
-  //             "type": "fruit",
-  //             "id": "34e2d577-bfcb-4b1b-a4c0-f1c958848675"
-  //           },
-  //           "character": null
-  //         },
-  //         {
-  //           "x": 4,
-  //           "y": 9,
-  //           "item": {
-  //             "type": "fruit",
-  //             "id": "54119a06-6641-40f1-9f4b-5a1363e90266"
-  //           },
-  //           "character": null
-  //         },
-  //         {
-  //           "x": 4,
-  //           "y": 10,
-  //           "item": {
-  //             "type": "fruit",
-  //             "id": "c9cc5627-5d01-4839-a895-0f05e1f3763a"
-  //           },
-  //           "character": null
-  //         },
-  //         {
-  //           "x": 4,
-  //           "y": 11,
-  //           "item": {
-  //             "type": "fruit",
-  //             "id": "0f5f476e-f669-4fba-8376-4597d6cf4c2b"
-  //           },
-  //           "character": null
-  //         },
-  //         {
-  //           "x": 11,
-  //           "y": 5,
-  //           "item": {
-  //             "type": "fruit",
-  //             "id": "1711073b-d527-437a-b633-c1405ceb0adf"
-  //           },
-  //           "character": null
-  //         },
-  //         {
-  //           "x": 11,
-  //           "y": 6,
-  //           "item": {
-  //             "type": "fruit",
-  //             "id": "c528a7f2-f680-4a4e-94ed-9638505f8918"
-  //           },
-  //           "character": null
-  //         },
-  //         {
-  //           "x": 11,
-  //           "y": 7,
-  //           "item": {
-  //             "type": "fruit",
-  //             "id": "13cc9945-d413-443a-bb60-3565e383a080"
-  //           },
-  //           "character": null
-  //         },
-  //         {
-  //           "x": 11,
-  //           "y": 8,
-  //           "item": {
-  //             "type": "fruit",
-  //             "id": "720157b4-2ae0-457b-ae7a-0a8fbe4fb5e5"
-  //           },
-  //           "character": null
-  //         },
-  //         {
-  //           "x": 11,
-  //           "y": 9,
-  //           "item": {
-  //             "type": "fruit",
-  //             "id": "dafb770f-c69a-4cac-8dc9-0e1e0e0435c8"
-  //           },
-  //           "character": null
-  //         },
-  //         {
-  //           "x": 11,
-  //           "y": 10,
-  //           "item": {
-  //             "type": "fruit",
-  //             "id": "d81b7db0-436f-4534-aef3-9fcad67655cf"
-  //           },
-  //           "character": null
-  //         },
-  //         {
-  //           "x": 11,
-  //           "y": 11,
-  //           "item": {
-  //             "type": "fruit",
-  //             "id": "f77b5cbb-1bea-4038-8247-96ea0b53969c"
-  //           },
-  //           "character": null
-  //         },
-  //         {
-  //           "x": 14,
-  //           "y": 4,
-  //           "item": null,
-  //           "character": {
-  //             "type": "troll",
-  //             "orientation": "down",
-  //             "id": "ae64e9ca-9074-4362-90be-282b85ba97ac"
-  //           }
-  //         },
-  //         {
-  //           "x": 14,
-  //           "y": 12,
-  //           "item": null,
-  //           "character": {
-  //             "type": "troll",
-  //             "orientation": "down",
-  //             "id": "e53d4570-c3ab-4a82-b4f3-55aafaedfcee"
-  //           }
-  //         },
-  //         {
-  //           "x": 15,
-  //           "y": 15,
-  //           "item": null,
-  //           "character": {
-  //             "type": "troll",
-  //             "orientation": "down",
-  //             "id": "e53d4570-c3ab-4a82-b4f3-55aafaedfcee"
-  //           }
-  //         }
-  //       ]
-  //     }
-  //   }
-  // });
+  const data = ({
+    "message": "match-found",
+    "match": {
+      "id": "fc93742b",
+      "level": 1,
+      "map": "match-1",
+      "host": "88b26ba7-ae82-4765-a080-157429683d92",
+      "guest": "d1ba4175-97d6-4b76-b065-c6af7e3255fb",
+      "board": {
+        "host": null,
+        "guest": null,
+        "fruitType": "banana",
+        "fruitsType": [
+          "banana",
+          "grape"
+        ],
+        "enemies": 4,
+        "enemiesCoordinates": [
+          [2, 4],
+          [2, 12],
+          [14, 4],
+          [14, 12]
+        ],
+        "fruitsCoordinates": [
+          [4, 5],
+          [4, 6],
+          [4, 7],
+          [4, 8],
+          [4, 9],
+          [4, 10],
+          [4, 11],
+          [11, 5],
+          [11, 6],
+          [11, 7],
+          [11, 8],
+          [11, 9],
+          [11, 10],
+          [11, 11]
+        ],
+        "fruits": 14,
+        "playersStartCoordinates": [
+          [9, 1],
+          [9, 14]
+        ],
+        "board": [
+          {
+            "x": 4,
+            "y": 2,
+            "item": null,
+            "character": {
+              "type": "troll",
+              "orientation": "down",
+              "id": "4b375c1c-8986-4a67-837e-926300bbac2d"
+            }
+          },
+          {
+            "x": 12,
+            "y": 2,
+            "item": null,
+            "character": {
+              "type": "troll",
+              "orientation": "down",
+              "id": "b8b5f880-7fa6-4220-9b70-b1a245f57827"
+            }
+          },
+          {
+            "x": 4,
+            "y": 5,
+            "item": {
+              "type": "fruit",
+              "id": "e004d80a-b167-4ae9-b38e-a1573fc65090"
+            },
+            "character": null
+          },
+          {
+            "x": 4,
+            "y": 6,
+            "item": {
+              "type": "fruit",
+              "id": "7cfe0de1-c709-42ed-a7d7-fa2673825d44"
+            },
+            "character": null
+          },
+          {
+            "x": 4,
+            "y": 7,
+            "item": {
+              "type": "fruit",
+              "id": "eb112536-8a3b-4d3a-8528-1d723d7d42e7"
+            },
+            "character": null
+          },
+          {
+            "x": 4,
+            "y": 8,
+            "item": {
+              "type": "fruit",
+              "id": "34e2d577-bfcb-4b1b-a4c0-f1c958848675"
+            },
+            "character": null
+          },
+          {
+            "x": 4,
+            "y": 9,
+            "item": {
+              "type": "fruit",
+              "id": "54119a06-6641-40f1-9f4b-5a1363e90266"
+            },
+            "character": null
+          },
+          {
+            "x": 4,
+            "y": 10,
+            "item": {
+              "type": "fruit",
+              "id": "c9cc5627-5d01-4839-a895-0f05e1f3763a"
+            },
+            "character": null
+          },
+          {
+            "x": 4,
+            "y": 11,
+            "item": {
+              "type": "fruit",
+              "id": "0f5f476e-f669-4fba-8376-4597d6cf4c2b"
+            },
+            "character": null
+          },
+          {
+            "x": 11,
+            "y": 5,
+            "item": {
+              "type": "fruit",
+              "id": "1711073b-d527-437a-b633-c1405ceb0adf"
+            },
+            "character": null
+          },
+          {
+            "x": 11,
+            "y": 6,
+            "item": {
+              "type": "fruit",
+              "id": "c528a7f2-f680-4a4e-94ed-9638505f8918"
+            },
+            "character": null
+          },
+          {
+            "x": 11,
+            "y": 7,
+            "item": {
+              "type": "fruit",
+              "id": "13cc9945-d413-443a-bb60-3565e383a080"
+            },
+            "character": null
+          },
+          {
+            "x": 11,
+            "y": 8,
+            "item": {
+              "type": "fruit",
+              "id": "720157b4-2ae0-457b-ae7a-0a8fbe4fb5e5"
+            },
+            "character": null
+          },
+          {
+            "x": 11,
+            "y": 9,
+            "item": {
+              "type": "fruit",
+              "id": "dafb770f-c69a-4cac-8dc9-0e1e0e0435c8"
+            },
+            "character": null
+          },
+          {
+            "x": 11,
+            "y": 10,
+            "item": {
+              "type": "fruit",
+              "id": "d81b7db0-436f-4534-aef3-9fcad67655cf"
+            },
+            "character": null
+          },
+          {
+            "x": 11,
+            "y": 11,
+            "item": {
+              "type": "fruit",
+              "id": "f77b5cbb-1bea-4038-8247-96ea0b53969c"
+            },
+            "character": null
+          },
+          {
+            "x": 4,
+            "y": 14,
+            "item": null,
+            "character": {
+              "type": "troll",
+              "orientation": "down",
+              "id": "ae64e9ca-9074-4362-90be-282b85ba97ac"
+            }
+          },
+          {
+            "x": 12,
+            "y": 14,
+            "item": null,
+            "character": {
+              "type": "troll",
+              "orientation": "down",
+              "id": "e53d4570-c3ab-4a82-b4f3-55aafaedfcee"
+            }
+          }
+        ]
+      }
+    }
+  });
   // Header States
   const [isRunning, setIsRunning] = useState(true);
   const [fruitsCounter, setFruitsCounter] = useState(0);
@@ -431,18 +421,18 @@ export default function GameScreen() {
         await preloadImages(gamePaths);
 
         // Establecer los datos del juego
-        setGameData(gameData);
-        setFruits(gameData?.match.board.fruitsType || []);
-        setBoardData(gameData?.match.board.board || []);
+        setGameData(data);
+        setFruits(data?.match.board.fruitsType || []);
+        setBoardData(data?.match.board.board || []);
 
         // Verificar si podemos finalizar la carga
         checkLoadingCompletion();
       } catch (error) {
         console.error("Error al cargar recursos del juego:", error);
         // Si hay error, cargar datos básicos de todos modos
-        setGameData(gameData);
-        setFruits(gameData?.match.board.fruitsType || []);
-        setBoardData(gameData?.match.board.board  || []);
+        setGameData(data);
+        setFruits(data?.match.board.fruitsType || []);
+        setBoardData(data?.match.board.board || []);
 
         // Forzar finalización después de un tiempo
         setTimeout(() => {
@@ -476,7 +466,7 @@ export default function GameScreen() {
     return (
       <LoadingScreen
         message={loadingMessage}
-        boardData={gameData?.match.board.board || []}
+        boardData={data?.match.board.board || []}
         componentProgress={componentProgress}
         progress={assetProgress}
       />
@@ -499,21 +489,21 @@ export default function GameScreen() {
           setSoundEffectsOn={setSoundEffectsOn}
         />
         <Board
-          boardData={gameData.match.board.board}
-          matchId={gameData.match.id}
-          hostId={gameData.match.host}
-          guestId={gameData.match.guest}
+          boardData={data.match.board.board}
+          matchId={data.match.id}
+          hostId={data.match.host}
+          guestId={data.match.guest}
           hostIsAlive={hostIsAlive}
           setHostIsAlive={setHostIsAlive}
           guestIsAlive={guestIsAlive}
           setGuestIsAlive={setGuestIsAlive}
-          actualFruit={actualFruit}
+          actualFruit={data.match.board.fruitType}
           setActualFruit={setActualFruit}
           setFruitsCounter={setFruitsCounter}
         />
         <FruitBar
-          fruits={gameData.match.board.fruitsType}
-          selectedFruit={actualFruit}
+          fruits={data.match.board.fruitsType}
+          selectedFruit={data.match}
           setSelectedFruit={setActualFruit}
         />
       </Suspense>

@@ -4,7 +4,7 @@ import Fruit from "./fruit/Fruit";
 import Troll from "./enemy/Troll";
 import IceBlock from "./ice-block/IceBlock";
 import "./Board.css";
-import type {Character, BoardCell, Item } from "./types/types";
+import type { Character, BoardCell, Item } from "./types/types";
 import { useUser } from "~/userContext";
 import { createWebSocketConnection, sendMessage, ws } from "~/services/websocket";
 
@@ -188,6 +188,7 @@ export default function Board({
             }
             if (message.idItemConsumed) {
               // Eliminar la fruta consumida
+              console.log("Removing fruit with ID:", message.idItemConsumed);
               removeFruit(message.idItemConsumed);
             }
           }
@@ -365,7 +366,7 @@ export default function Board({
       const style = getElementsStyles(fruit.x, fruit.y, cellSize);
       return (
         <div key={fruit.item.id} style={style}>
-          <Fruit fruitInformation={fruit} subtype={actualFruit}/>
+          <Fruit fruitInformation={fruit} subtype={actualFruit} />
         </div>
       );
     });
@@ -377,7 +378,7 @@ export default function Board({
       const style = getElementsStyles(block.x, block.y, cellSize);
       return (
         <div key={block.item.id} style={style}>
-          <IceBlock blockInformation={block}/>
+          <IceBlock blockInformation={block} />
         </div>
       );
     });
@@ -389,7 +390,7 @@ export default function Board({
       const style = getElementsStyles(enemy.x, enemy.y, cellSize);
       return (
         <div key={enemy.character.id} style={style}>
-          <Troll trollInformation={enemy}/>
+          <Troll trollInformation={enemy} />
         </div>
       );
     });
@@ -401,13 +402,13 @@ export default function Board({
       const style = getElementsStyles(iceCream.x, iceCream.y, cellSize);
       return (
         <div key={iceCream.character.id} style={style}>
-          <IceCream 
-            playerInformation={iceCream} 
+          <IceCream
+            playerInformation={iceCream}
             playerColor={actualFruit}
-            hostIsAlive={hostIsAlive} setHostIsAlive={setHostIsAlive} 
+            hostIsAlive={hostIsAlive} setHostIsAlive={setHostIsAlive}
             guestIsAlive={guestIsAlive} setGuestIsAlive={setGuestIsAlive}
             hostId={hostId} guestId={guestId} matchId={matchId}
-            />
+          />
         </div>
       );
     });
@@ -416,8 +417,17 @@ export default function Board({
   // FUNCIONES DE FRUTAS
   // --- Elimina una fruit dado su id
   const removeFruit = useCallback((id: string) => {
-    setFruits(prev => prev.filter(cell => cell.item?.id !== id));
-  }, []);
+    console.log("Removing fruit with ID:", id);
+
+    // Eliminar la fruta del estado actual
+    setFruits((prev) => prev.filter((cell) => cell.item?.id !== id));
+
+    // Volver a cargar el mock
+    setFruits(boardData.filter((cell) => cell.item?.type === "fruit"));
+    setEnemies(boardData.filter((cell) => cell.character?.type === "troll"));
+    setIceBlocks(boardData.filter((cell) => cell.item?.type === "block"));
+    setIceCreams(boardData.filter((cell) => cell.character?.type === "iceCream"));
+  }, [boardData]);
   // --- Añade una fruta
   const addFruit = (newFruitCell: BoardCell) => {
     setFruits(prevFruits => {
@@ -431,7 +441,7 @@ export default function Board({
       return prevFruits;
     });
   };
-  
+
   // FUNCIONES DE BLOQUES
   // --- Elimina un bloque de hielo dado su id
   const removeBlock = useCallback((id: string) => {
@@ -457,14 +467,14 @@ export default function Board({
       prev.map(cell =>
         cell.character?.id === id
           ? {
-              ...cell,
-              x: newX,
-              y: newY,
-              character: {
-                ...cell.character!,
-                direction: newDirection
-              }
+            ...cell,
+            x: newX,
+            y: newY,
+            character: {
+              ...cell.character!,
+              direction: newDirection
             }
+          }
           : cell
       )
     );
@@ -477,14 +487,14 @@ export default function Board({
       prev.map(cell =>
         cell.character?.id === id
           ? {
-              ...cell,
-              x: newX,
-              y: newY,
-              character: {
-                ...cell.character!,
-                direction: newDirection
-              }
+            ...cell,
+            x: newX,
+            y: newY,
+            character: {
+              ...cell.character!,
+              direction: newDirection
             }
+          }
           : cell
       )
     );
@@ -589,7 +599,7 @@ export default function Board({
         {cellSize > 0 && renderIceBlocks()}
         {cellSize > 0 && renderFruits()}
         {cellSize > 0 && renderIceCreams()}
-        
+
       </div>
     </div>
   );
