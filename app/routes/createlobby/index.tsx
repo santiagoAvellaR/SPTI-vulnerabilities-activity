@@ -180,32 +180,32 @@ export default function Lobby() {
 
                     if (message.match.host === userData?.userId) {
                         // Si eres el host
-                        const position = positions[0];
+                        const position = positions[0].reverse();
                         console.log("Position for player 1 (host):", position);
 
                         // Llenar los datos del host en userData
                         setUserData({
                             ...userData,
                             matchId: message.match.id,
-                            position: position,
+                            position: position.reverse(),
                         });
 
                         // Llenar los datos del guest en secondaryUserData
                         setSecondaryUserData({
                             userId: message.match.guest,
                             username: message.match.guestUsername, // Si existe un campo para el nombre del guest
-                            position: positions[1],
+                            position: positions[1].reverse(),
                         });
 
                         console.log("Host data updated:", {
                             ...userData,
                             matchId: message.match.id,
-                            position: position,
+                            position: position.reverse(),
                         });
                         console.log("Guest data updated in secondaryUserData:", {
                             userId: message.match.guest,
                             username: message.match.guestUsername,
-                            position: positions[1],
+                            position: positions[1].reverse(),
                         });
                     } else {
                         // Si eres el guest
@@ -215,25 +215,25 @@ export default function Lobby() {
                         setUserData({
                             ...userData,
                             matchId: message.match.id,
-                            position: positions[1],
+                            position: positions[1].reverse(),
                         });
 
                         // Llenar los datos del host en secondaryUserData
                         setSecondaryUserData({
                             userId: message.match.host,
                             username: message.match.hostUsername, // Si existe un campo para el nombre del host
-                            position: positions[0],
+                            position: positions[0].reverse(),
                         });
 
                         console.log("Guest data updated:", {
                             ...userData,
                             matchId: message.match.id,
-                            position: positions[1],
+                            position: positions[1].reverse(),
                         });
                         console.log("Host data updated in secondaryUserData:", {
                             userId: message.match.host,
                             username: message.match.hostUsername,
-                            position: positions[0],
+                            position: positions[0].reverse(),
                         });
                     }
                     console.log("userData updated with matchId:", userData);
