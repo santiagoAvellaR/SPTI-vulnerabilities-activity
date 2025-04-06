@@ -29,6 +29,7 @@ type BoardProps = {
   backgroundImage?: string;
   actualFruit: string;
   setActualFruit: (fruit: string) => void;
+  fruitsCounter: number;
   setFruitsCounter: (count: number) => void;
 };
 
@@ -42,7 +43,10 @@ export default function Board({
   guestIsAlive,
   setGuestIsAlive,
   backgroundImage = "/fondo mapa.png",
-  actualFruit
+  actualFruit,
+  setActualFruit,
+  fruitsCounter,
+  setFruitsCounter
 }: BoardProps) {
   // Referencia al canvas
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -190,6 +194,7 @@ export default function Board({
               // Eliminar la fruta consumida
               console.log("Removing fruit with ID:", message.idItemConsumed);
               removeFruit(message.idItemConsumed);
+              setFruitsCounter(fruitsCounter + 1);
             }
           }
         } catch (error) {
@@ -363,7 +368,7 @@ export default function Board({
   const renderFruits = () => {
     return fruits.map((fruit) => {
       if (!fruit.item) return null; // Asegúrate de que el item exista
-      const style = getElementsStyles(fruit.x, fruit.y, cellSize);
+      const style = getElementsStyles(fruit.y, fruit.x, cellSize);
       return (
         <div key={fruit.item.id} style={style}>
           <Fruit fruitInformation={fruit} subtype={actualFruit} />
@@ -375,7 +380,7 @@ export default function Board({
   const renderIceBlocks = () => {
     return iceBlocks.map((block) => {
       if (!block.item) return null; // Asegúrate de que el item exista
-      const style = getElementsStyles(block.x, block.y, cellSize);
+      const style = getElementsStyles(block.y, block.x, cellSize);
       return (
         <div key={block.item.id} style={style}>
           <IceBlock blockInformation={block} />
@@ -387,7 +392,7 @@ export default function Board({
   const renderEnemies = () => {
     return enemies.map((enemy) => {
       if (!enemy.character) return null; // Asegúrate de que el item exista
-      const style = getElementsStyles(enemy.x, enemy.y, cellSize);
+      const style = getElementsStyles(enemy.y, enemy.x, cellSize);
       return (
         <div key={enemy.character.id} style={style}>
           <Troll trollInformation={enemy} />
@@ -399,7 +404,7 @@ export default function Board({
   const renderIceCreams = () => {
     return iceCreams.map((iceCream) => {
       if (!iceCream.character) return null; // Asegúrate de que el item exista
-      const style = getElementsStyles(iceCream.x, iceCream.y, cellSize);
+      const style = getElementsStyles(iceCream.y, iceCream.x, cellSize);
       return (
         <div key={iceCream.character.id} style={style}>
           <IceCream
@@ -418,16 +423,10 @@ export default function Board({
   // --- Elimina una fruit dado su id
   const removeFruit = useCallback((id: string) => {
     console.log("Removing fruit with ID:", id);
-
     // Eliminar la fruta del estado actual
     setFruits((prev) => prev.filter((cell) => cell.item?.id !== id));
+  }, []);
 
-    // Volver a cargar el mock
-    setFruits(boardData.filter((cell) => cell.item?.type === "fruit"));
-    setEnemies(boardData.filter((cell) => cell.character?.type === "troll"));
-    setIceBlocks(boardData.filter((cell) => cell.item?.type === "block"));
-    setIceCreams(boardData.filter((cell) => cell.character?.type === "iceCream"));
-  }, [boardData]);
   // --- Añade una fruta
   const addFruit = (newFruitCell: BoardCell) => {
     setFruits(prevFruits => {
