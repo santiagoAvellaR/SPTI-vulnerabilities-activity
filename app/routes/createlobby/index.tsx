@@ -52,6 +52,7 @@ export default function Lobby() {
 
     // Variable para prevenir navegaciones duplicadas
     const [gameStarted, setGameStarted] = useState(false);
+    const [message, setMessage] = useState(null);
 
     // Efecto para mostrar al segundo jugador después de 10 segundos
     // useEffect(() => {
@@ -146,7 +147,7 @@ export default function Lobby() {
                         clearInterval(timer);
 
                         // Marcar como iniciado y navegar
-                        navigate("/game");
+                        navigate("/game", { state: message });
                         setGameStarted(true);
                         return 0;
                     }
@@ -175,6 +176,7 @@ export default function Lobby() {
 
                 if (message.message === 'match-found') {
                     console.log("Match found ID:", message.match?.id);
+                    setMessage(message); // Guardar el mensaje en el estado
 
                     // Guardar matchId en userData
 
@@ -271,7 +273,7 @@ export default function Lobby() {
             // For solo mode, only check if player 1 is ready
             if (player1Ready && player1IceCream) {
                 setGameStarted(true);
-                navigate("/game");
+                navigate("/game", { state: message });
             } else {
                 alert("Please select your character and click Ready to start");
             }
@@ -279,7 +281,7 @@ export default function Lobby() {
             // For two-player mode, check both players
             if ((player1Ready && player2Ready) && (player1IceCream && player2IceCream)) {
                 setGameStarted(true);
-                navigate("/game");
+                navigate("/game", { state: message });
             } else {
                 alert("Both players must select a character and be ready to start");
             }
