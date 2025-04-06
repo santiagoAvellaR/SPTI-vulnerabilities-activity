@@ -29,6 +29,7 @@ type BoardProps = {
   backgroundImage?: string;
   actualFruit: string;
   setActualFruit: (fruit: string) => void;
+  fruitsCounter: number;
   setFruitsCounter: (count: number) => void;
 };
 
@@ -42,7 +43,10 @@ export default function Board({
   guestIsAlive,
   setGuestIsAlive,
   backgroundImage = "/fondo mapa.png",
-  actualFruit
+  actualFruit,
+  setActualFruit,
+  fruitsCounter,
+  setFruitsCounter
 }: BoardProps) {
   // Referencia al canvas
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -190,6 +194,7 @@ export default function Board({
               // Eliminar la fruta consumida
               console.log("Removing fruit with ID:", message.idItemConsumed);
               removeFruit(message.idItemConsumed);
+              setFruitsCounter(fruitsCounter + 1);
             }
           }
         } catch (error) {
