@@ -5,14 +5,9 @@ import "./Header.css";
 interface HeaderProps {
   isRunning: boolean;
   setIsRunning: (isRunning: boolean) => void;
-  player1Score: number;
-  setPlayer1Score: (score: number) => void;
-  player2Score: number;
-  setPlayer2Score: (score: number) => void;
+  fruitsCounter: number;
   minutes: number;
-  setMinutes: (minutes: number) => void;
   seconds: number;
-  setSeconds: (seconds: number) => void;
   musicOn: boolean;
   setMusicOn: (musicOn: boolean) => void;
   soundEffectsOn: boolean;
@@ -21,10 +16,9 @@ interface HeaderProps {
 
 export default function Header({
   isRunning, setIsRunning,
-  player1Score, setPlayer1Score,
-  player2Score, setPlayer2Score,
-  minutes, setMinutes,
-  seconds, setSeconds,
+  fruitsCounter,
+  minutes,
+  seconds,
   musicOn, setMusicOn,
   soundEffectsOn, setSoundEffectsOn
 }: HeaderProps) {
@@ -32,8 +26,7 @@ export default function Header({
   return (
     <div className="header">
       {/* Scores */}
-      <ScoreCounter score={player1Score} playerNumber={1} />
-      <ScoreCounter score={player2Score} playerNumber={2} />
+      <ScoreCounter score={fruitsCounter} playerNumber={1} />
 
       {/* Timer */}
       <Timer isRunning={isRunning} setIsRunning={setIsRunning} minutes={minutes} seconds={seconds} />
